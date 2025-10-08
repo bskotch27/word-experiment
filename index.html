@@ -94,11 +94,10 @@
         }
         
         .letter-display {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-            flex-wrap: wrap;
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
         }
         
         .letter-box {
@@ -113,6 +112,12 @@
             font-weight: bold;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: absolute;
+            transition: transform 0.3s;
+        }
+        
+        .letter-box:hover {
+            transform: scale(1.1);
         }
         
         .timer {
@@ -225,11 +230,47 @@
             min-height: 20px;
         }
 
-        .progress-indicator {
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
+        .done-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .done-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.4);
+            background: #218838;
+        }
+        
+        .done-button:active {
+            transform: translateY(0);
+        }
+
+        .version-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
             font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .version-badge.small {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .version-badge.big {
+            background: #f3e5f5;
+            color: #7b1fa2;
         }
     </style>
 </head>
@@ -244,9 +285,8 @@
                 
                 <h2 style="margin-top: 25px;">How it works:</h2>
                 <ul>
-                    <li>You will complete TWO rounds of word generation</li>
-                    <li>Each round gives you a set of letters</li>
-                    <li>You have <strong>3 minutes</strong> per round</li>
+                    <li>You will be given a set of letters</li>
+                    <li>You have <strong>3 minutes</strong> to complete the task</li>
                     <li>Create as many valid English words as possible using only the given letters</li>
                     <li>You can use each letter multiple times in different words</li>
                     <li>Minimum word length: 2 letters</li>
@@ -254,7 +294,7 @@
                 </ul>
                 
                 <div class="highlight">
-                    <strong>Important:</strong> Please complete both rounds without interruption. The entire experiment takes about 8 minutes.
+                    <strong>Important:</strong> You can click "I am done" when you've found all the words you can think of, or wait for the timer to run out.
                 </div>
             </div>
             <button onclick="startExperiment()">Start Experiment</button>
@@ -263,8 +303,10 @@
         <!-- Game Screen -->
         <div class="screen" id="game-screen">
             <div class="participant-id" id="participant-info"></div>
-            <div class="progress-indicator" id="progress-indicator"></div>
-            <h1 id="round-title">Round 1</h1>
+            <h1>Word Generation Challenge</h1>
+            <div style="text-align: center;">
+                <span class="version-badge" id="version-badge"></span>
+            </div>
             <p style="text-align: center; color: #666; margin-bottom: 20px;">
                 Create as many words as possible using these letters:
             </p>
@@ -287,21 +329,8 @@
             <div style="text-align: center; color: #666; margin-top: 20px;">
                 Words found: <strong id="word-count">0</strong>
             </div>
-        </div>
-
-        <!-- Transition Screen -->
-        <div class="screen" id="transition-screen">
-            <h1>Great Job! 🎉</h1>
-            <div class="instructions">
-                <p>You've completed the first round!</p>
-                <p style="margin-top: 20px;">You found <strong id="round1-count">0</strong> words.</p>
-                
-                <div class="highlight" style="margin-top: 30px;">
-                    <strong>Ready for Round 2?</strong><br>
-                    The next round will have a different set of letters. Same rules apply!
-                </div>
-            </div>
-            <button onclick="startRound2()">Continue to Round 2</button>
+            
+            <button class="done-button" onclick="confirmDone()">I am done ✓</button>
         </div>
 
         <!-- Results Screen -->
@@ -311,31 +340,21 @@
                 <h2>Your Results:</h2>
                 <table class="results-table">
                     <tr>
-                        <th>Round</th>
+                        <th>Version</th>
                         <th>Letters</th>
                         <th>Words Found</th>
+                        <th>Time Used</th>
                     </tr>
                     <tr>
-                        <td>Round 1</td>
-                        <td id="result-letters-1"></td>
-                        <td id="result-count-1"></td>
-                    </tr>
-                    <tr>
-                        <td>Round 2</td>
-                        <td id="result-letters-2"></td>
-                        <td id="result-count-2"></td>
+                        <td id="result-version"></td>
+                        <td id="result-letters"></td>
+                        <td id="result-count"></td>
+                        <td id="result-time"></td>
                     </tr>
                 </table>
 
                 <h2 style="margin-top: 30px;">Your Words:</h2>
-                <div style="margin-top: 15px;">
-                    <strong>Round 1:</strong>
-                    <div id="result-words-1" style="margin: 10px 0; color: #666;"></div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <strong>Round 2:</strong>
-                    <div id="result-words-2" style="margin: 10px 0; color: #666;"></div>
-                </div>
+                <div id="result-words" style="margin: 10px 0; color: #666; line-height: 1.8;"></div>
 
                 <div class="highlight" style="margin-top: 30px;">
                     Thank you for participating! Your responses have been recorded.
@@ -348,24 +367,19 @@
 
     <script>
         // Experiment Configuration
-        const FULL_SET = ['S', 'T', 'A', 'R', 'E', 'N', 'D', 'I', 'O', 'P'];
-        const SUBSET = ['S', 'T', 'A', 'R', 'E'];
+        const SMALL_WORLD = ['S', 'T', 'A', 'R', 'E']; // 5 letters
+        const BIG_WORLD = ['S', 'T', 'A', 'R', 'E', 'N', 'D', 'I', 'O', 'P']; // 10 letters
         const TIME_LIMIT = 180; // 3 minutes in seconds
 
         // Experiment State
         let participantId = '';
-        let condition = ''; // 'full-first' or 'subset-first'
-        let currentRound = 1;
+        let version = ''; // 'small-world' or 'big-world'
         let currentLetters = [];
         let currentWords = [];
         let timerInterval = null;
         let timeRemaining = TIME_LIMIT;
-        
-        // Results Storage
-        let round1Letters = [];
-        let round1Words = [];
-        let round2Letters = [];
-        let round2Words = [];
+        let startTime = null;
+        let endTime = null;
 
         function generateParticipantId() {
             return 'P' + Date.now().toString().slice(-8);
@@ -373,30 +387,38 @@
 
         function startExperiment() {
             participantId = generateParticipantId();
-            // Randomly assign condition (counterbalancing)
-            condition = Math.random() < 0.5 ? 'full-first' : 'subset-first';
             
-            document.getElementById('participant-info').textContent = `Participant ID: ${participantId} | Condition: ${condition}`;
+            // Coin flip: randomly assign to small or big world
+            version = Math.random() < 0.5 ? 'small-world' : 'big-world';
             
-            showScreen('game-screen');
-            startRound(1);
-        }
-
-        function startRound(roundNumber) {
-            currentRound = roundNumber;
-            currentWords = [];
-            timeRemaining = TIME_LIMIT;
-            
-            // Determine which letter set to use
-            if ((condition === 'full-first' && roundNumber === 1) || 
-                (condition === 'subset-first' && roundNumber === 2)) {
-                currentLetters = [...FULL_SET];
+            // Set letters based on version
+            if (version === 'small-world') {
+                currentLetters = [...SMALL_WORLD];
             } else {
-                currentLetters = [...SUBSET];
+                currentLetters = [...BIG_WORLD];
             }
             
-            document.getElementById('round-title').textContent = `Round ${roundNumber}`;
-            document.getElementById('progress-indicator').textContent = `Round ${roundNumber} of 2`;
+            // Update UI
+            document.getElementById('participant-info').textContent = `Participant ID: ${participantId} | Version: ${version}`;
+            
+            const badge = document.getElementById('version-badge');
+            if (version === 'small-world') {
+                badge.textContent = 'Small World (5 letters)';
+                badge.className = 'version-badge small';
+            } else {
+                badge.textContent = 'Big World (10 letters)';
+                badge.className = 'version-badge big';
+            }
+            
+            showScreen('game-screen');
+            startGame();
+        }
+
+        function startGame() {
+            currentWords = [];
+            timeRemaining = TIME_LIMIT;
+            startTime = new Date();
+            
             displayLetters();
             updateWordDisplay();
             document.getElementById('word-input').value = '';
@@ -409,10 +431,25 @@
         function displayLetters() {
             const container = document.getElementById('letter-display');
             container.innerHTML = '';
-            currentLetters.forEach(letter => {
+            
+            const numLetters = currentLetters.length;
+            const radius = 120; // radius of the circle
+            const centerX = 150; // center of container
+            const centerY = 150;
+            
+            currentLetters.forEach((letter, index) => {
                 const box = document.createElement('div');
                 box.className = 'letter-box';
                 box.textContent = letter;
+                
+                // Calculate position on circle
+                const angle = (index / numLetters) * 2 * Math.PI - Math.PI / 2; // Start from top
+                const x = centerX + radius * Math.cos(angle) - 30; // -30 to center the 60px box
+                const y = centerY + radius * Math.sin(angle) - 30;
+                
+                box.style.left = x + 'px';
+                box.style.top = y + 'px';
+                
                 container.appendChild(box);
             });
         }
@@ -428,7 +465,7 @@
                 }
                 
                 if (timeRemaining <= 0) {
-                    endRound();
+                    endGame();
                 }
             }, 1000);
         }
@@ -440,26 +477,21 @@
                 `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function endRound() {
+        function endGame() {
             clearInterval(timerInterval);
             document.getElementById('timer').classList.remove('warning');
-            
-            // Save round results
-            if (currentRound === 1) {
-                round1Letters = [...currentLetters];
-                round1Words = [...currentWords];
-                document.getElementById('round1-count').textContent = currentWords.length;
-                showScreen('transition-screen');
-            } else {
-                round2Letters = [...currentLetters];
-                round2Words = [...currentWords];
-                showResults();
-            }
+            endTime = new Date();
+            showResults();
         }
 
-        function startRound2() {
-            showScreen('game-screen');
-            startRound(2);
+        function confirmDone() {
+            const confirmed = confirm(
+                `Are you sure you want to finish?\n\nYou have found ${currentWords.length} word(s) so far.\nTime remaining: ${Math.floor(timeRemaining / 60)}:${(timeRemaining % 60).toString().padStart(2, '0')}`
+            );
+            
+            if (confirmed) {
+                endGame();
+            }
         }
 
         // Word Input Handling
@@ -534,13 +566,19 @@
         }
 
         function showResults() {
-            document.getElementById('result-letters-1').textContent = round1Letters.join(', ');
-            document.getElementById('result-count-1').textContent = round1Words.length;
-            document.getElementById('result-words-1').textContent = round1Words.join(', ');
+            // Calculate time used
+            const timeUsed = TIME_LIMIT - timeRemaining;
+            const minutesUsed = Math.floor(timeUsed / 60);
+            const secondsUsed = timeUsed % 60;
+            const timeUsedStr = `${minutesUsed}:${secondsUsed.toString().padStart(2, '0')}`;
             
-            document.getElementById('result-letters-2').textContent = round2Letters.join(', ');
-            document.getElementById('result-count-2').textContent = round2Words.length;
-            document.getElementById('result-words-2').textContent = round2Words.join(', ');
+            // Display results
+            document.getElementById('result-version').textContent = 
+                version === 'small-world' ? 'Small World' : 'Big World';
+            document.getElementById('result-letters').textContent = currentLetters.join(', ');
+            document.getElementById('result-count').textContent = currentWords.length;
+            document.getElementById('result-time').textContent = timeUsedStr;
+            document.getElementById('result-words').textContent = currentWords.join(', ');
             
             showScreen('results-screen');
             
@@ -556,20 +594,17 @@
         }
 
         function storeResults() {
+            const timeUsed = TIME_LIMIT - timeRemaining;
+            
             const results = {
                 participantId: participantId,
-                condition: condition,
+                version: version,
                 timestamp: new Date().toISOString(),
-                round1: {
-                    letters: round1Letters.join(''),
-                    wordCount: round1Words.length,
-                    words: round1Words
-                },
-                round2: {
-                    letters: round2Letters.join(''),
-                    wordCount: round2Words.length,
-                    words: round2Words
-                }
+                letters: currentLetters.join(''),
+                wordCount: currentWords.length,
+                words: currentWords,
+                timeUsedSeconds: timeUsed,
+                completedEarly: timeRemaining > 0
             };
             
             // Store in memory for download
@@ -583,16 +618,15 @@
             const results = window.experimentResults;
             
             // Create CSV content
-            let csv = 'Participant ID,Condition,Timestamp,Round,Letters,Word Count,Words\n';
-            csv += `${results.participantId},${results.condition},${results.timestamp},1,${results.round1.letters},${results.round1.wordCount},"${results.round1.words.join(', ')}"\n`;
-            csv += `${results.participantId},${results.condition},${results.timestamp},2,${results.round2.letters},${results.round2.wordCount},"${results.round2.words.join(', ')}"\n`;
+            let csv = 'Participant ID,Version,Timestamp,Letters,Word Count,Time Used (seconds),Completed Early,Words\n';
+            csv += `${results.participantId},${results.version},${results.timestamp},${results.letters},${results.wordCount},${results.timeUsedSeconds},${results.completedEarly},"${results.words.join(', ')}"\n`;
             
             // Create download
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `experiment_${results.participantId}_${Date.now()}.csv`;
+            a.download = `experiment_${results.participantId}_${results.version}_${Date.now()}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
         }
