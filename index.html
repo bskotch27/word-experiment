@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Game - Make Words from Alphabets</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Word Game</h1>
+            <p class="subtitle">Make words from the given alphabets!</p>
+        </header>
+
+        <div class="game-info">
+            <div class="info-item">
+                <span class="label">Score:</span>
+                <span class="value" id="score">0</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Words Found:</span>
+                <span class="value" id="wordsFound">0</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Time:</span>
+                <span class="value" id="timer">0:00</span>
+            </div>
+        </div>
+
+        <div class="letters-container">
+            <h2>Available Letters:</h2>
+            <div id="letters" class="letters"></div>
+            <button id="shuffleBtn" class="btn btn-shuffle">Shuffle Letters</button>
+        </div>
+
+        <div class="word-input-container">
+            <h2>Create a Word:</h2>
+            <div class="input-wrapper">
+                <input type="text" id="wordInput" placeholder="Type your word here..." autocomplete="off">
+                <button id="submitBtn" class="btn btn-submit">Submit Word</button>
+                <button id="clearBtn" class="btn btn-clear">Clear</button>
+            </div>
+            <div id="message" class="message"></div>
+        </div>
+
+        <div class="words-list-container">
+            <h2>Your Words:</h2>
+            <div id="wordsList" class="words-list">
+                <p class="empty-message">No words yet. Start making words!</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="newGameBtn" class="btn btn-new-game">New Game</button>
+            <button id="rulesBtn" class="btn btn-rules">Rules</button>
+        </div>
+    </div>
+
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Game Rules</h2>
+            <ul>
+                <li>Use the provided letters to create valid words</li>
+                <li>Each letter can be used only as many times as it appears</li>
+                <li>Words must be at least 3 letters long</li>
+                <li>Longer words earn more points (1 point per letter)</li>
+                <li>You can shuffle the letters to see them in a different order</li>
+                <li>Try to find as many words as possible!</li>
+            </ul>
+            <button class="btn btn-close-modal">Got it!</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
