@@ -15,27 +15,26 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            min-height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 15px;
         }
         
         .container {
             background: white;
             border-radius: 20px;
-            padding: 25px;
-            max-width: 700px;
+            padding: 20px;
+            max-width: 600px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         
         h1 {
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
+            font-size: 24px;
         }
         
         h2 {
@@ -94,63 +93,152 @@
         button:active {
             transform: translateY(0);
         }
+
+        /* Game Layout */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .timer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .timer-box.warning {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .score-box {
+            background: linear-gradient(135deg, #28a745 0%, #20883b 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .score-value {
+            font-size: 32px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .stats-box {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-number.valid {
+            color: #28a745;
+        }
+
+        .stat-number.invalid {
+            color: #e74c3c;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
         
         .letter-display {
             position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 30px auto;
+            width: 240px;
+            height: 240px;
+            margin: 20px auto;
         }
         
         .letter-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             position: absolute;
-            transition: transform 0.3s;
+            transition: transform 0.2s;
         }
         
         .letter-box:hover {
             transform: scale(1.1);
         }
         
-        .timer {
+        .word-meaning {
             text-align: center;
-            font-size: 48px;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #555;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 4px solid #667eea;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .word-meaning.show {
+            opacity: 1;
+        }
+
+        .word-meaning .word-label {
             font-weight: bold;
             color: #667eea;
-            margin: 20px 0;
-        }
-        
-        .timer.warning {
-            color: #e74c3c;
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        .word-input-area {
-            margin: 20px 0;
+            margin-right: 8px;
         }
         
         .word-input-area input {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             font-size: 18px;
             border: 2px solid #ddd;
             border-radius: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             transition: border-color 0.3s;
         }
         
@@ -158,28 +246,36 @@
             outline: none;
             border-color: #667eea;
         }
+
+        .input-feedback {
+            font-size: 14px;
+            color: #e74c3c;
+            margin-bottom: 8px;
+            min-height: 20px;
+        }
         
         .word-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-            min-height: 100px;
-            padding: 15px;
+            gap: 8px;
+            margin: 15px 0;
+            padding: 12px;
             background: #f8f9fa;
             border-radius: 10px;
+            min-height: 80px;
+            max-height: 120px;
+            overflow-y: auto;
         }
         
         .word-tag {
             background: #667eea;
             color: white;
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            position: relative;
+            gap: 6px;
         }
 
         .word-tag.invalid {
@@ -188,10 +284,30 @@
 
         .word-points {
             background: rgba(255, 255, 255, 0.3);
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: bold;
+        }
+        
+        .done-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 15px auto;
+            display: block;
+        }
+        
+        .done-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.4);
+            background: #218838;
         }
         
         .results-table {
@@ -220,113 +336,6 @@
             margin: 15px 0;
             border-left: 4px solid #ffc107;
         }
-        
-        .participant-id {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .input-feedback {
-            font-size: 14px;
-            color: #e74c3c;
-            margin-top: 5px;
-            min-height: 20px;
-        }
-
-        .done-button {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin: 20px auto;
-            display: block;
-        }
-        
-        .done-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.4);
-            background: #218838;
-        }
-        
-        .done-button:active {
-            transform: translateY(0);
-        }
-
-        .version-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .score-display {
-            text-align: center;
-            margin: 30px 0 20px 0;
-            padding: 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .score-label {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .score-value {
-            color: white;
-            font-size: 48px;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            animation: scoreChange 0.3s ease-out;
-        }
-
-        @keyframes scoreChange {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .word-meaning {
-            text-align: center;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-size: 14px;
-            color: #555;
-            line-height: 1.6;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-left: 4px solid #667eea;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .word-meaning.show {
-            opacity: 1;
-        }
-
-        .word-meaning .word-label {
-            font-weight: bold;
-            color: #667eea;
-            margin-right: 8px;
-        }
 
         .stats-row {
             display: flex;
@@ -335,30 +344,20 @@
             margin-top: 20px;
         }
 
-        .stat-item {
+        .stat-item-result {
             text-align: center;
         }
 
-        .stat-label {
+        .stat-label-result {
             color: #666;
             font-size: 14px;
             margin-bottom: 5px;
         }
 
-        .stat-value {
+        .stat-value-result {
             color: #333;
             font-size: 24px;
             font-weight: bold;
-        }
-
-        .version-badge.small {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .version-badge.big {
-            background: #f3e5f5;
-            color: #7b1fa2;
         }
 
         .saving-indicator {
@@ -380,6 +379,93 @@
             background: #f8d7da;
             color: #721c24;
         }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+
+            .game-header {
+                justify-content: center;
+            }
+
+            .timer-box {
+                font-size: 24px;
+                padding: 8px 16px;
+            }
+
+            .score-box {
+                padding: 8px 16px;
+            }
+
+            .score-value {
+                font-size: 28px;
+            }
+
+            .letter-display {
+                width: 200px;
+                height: 200px;
+            }
+
+            .letter-box {
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+            }
+
+            .word-input-area input {
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .word-list {
+                max-height: 100px;
+                min-height: 60px;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 18px;
+            }
+
+            .letter-display {
+                width: 180px;
+                height: 180px;
+            }
+
+            .letter-box {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+
+            .timer-box, .score-box {
+                padding: 6px 12px;
+            }
+
+            .timer-box {
+                font-size: 20px;
+            }
+
+            .score-value {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -396,8 +482,9 @@
                     <li>You will be given a set of letters</li>
                     <li>You have <strong>3 minutes</strong> to complete the task</li>
                     <li>Create as many valid English words as possible using only the given letters</li>
-                    <li>You can use each letter only once in a word/li>
-                    <li>Minimum word length: 2 letters</li>                 
+                    <li>You can use each letter multiple times in different words</li>
+                    <li>Minimum word length: 2 letters</li>
+                    <li>No proper nouns (names, places, etc.)</li>
                 </ul>
                 
                 <div class="highlight">
@@ -409,36 +496,32 @@
 
         <!-- Game Screen -->
         <div class="screen" id="game-screen">
-            <h1 style="margin-bottom: 10px; font-size: 24px;">Word Generation Challenge</h1>
+            <h1>Word Generation Challenge</h1>
             
-            <div class="game-layout">
-                <div class="side-panel left-panel">
-                    <div class="timer-compact" id="timer">3:00</div>
-                    <div class="word-count-display">
-                        <div style="color: #28a745; font-weight: bold; font-size: 20px;" id="word-count">0</div>
-                        <div style="font-size: 11px; color: #666;">Valid</div>
-                    </div>
-                    <div class="word-count-display">
-                        <div style="color: #e74c3c; font-weight: bold; font-size: 20px;" id="invalid-count">0</div>
-                        <div style="font-size: 11px; color: #666;">Invalid</div>
-                    </div>
+            <div class="game-header">
+                <div class="timer-box" id="timer">3:00</div>
+                <div class="score-box">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score-value">0</div>
                 </div>
-                
-                <div class="center-panel">
-                    <div class="letter-display-compact" id="letter-display"></div>
+            </div>
+
+            <div class="stats-box">
+                <div class="stat-item">
+                    <div class="stat-number valid" id="word-count">0</div>
+                    <div class="stat-label">Valid</div>
                 </div>
-                
-                <div class="side-panel right-panel">
-                    <div class="score-display-compact">
-                        <div class="score-label-compact">Score</div>
-                        <div class="score-value-compact" id="score-value">0</div>
-                    </div>
+                <div class="stat-item">
+                    <div class="stat-number invalid" id="invalid-count">0</div>
+                    <div class="stat-label">Invalid</div>
                 </div>
             </div>
             
-            <div class="word-meaning-compact" id="word-meaning"></div>
+            <div class="letter-display" id="letter-display"></div>
             
-            <div class="word-input-area-compact">
+            <div class="word-meaning" id="word-meaning"></div>
+            
+            <div class="word-input-area">
                 <input 
                     type="text" 
                     id="word-input" 
@@ -448,9 +531,9 @@
                 <div class="input-feedback" id="input-feedback"></div>
             </div>
             
-            <div class="word-list-compact" id="word-list"></div>
+            <div class="word-list" id="word-list"></div>
             
-            <button class="done-button-compact" onclick="confirmDone()">I am done ✓</button>
+            <button class="done-button" onclick="confirmDone()">I am done ✓</button>
         </div>
 
         <!-- Results Screen -->
@@ -459,17 +542,17 @@
             <div class="instructions">
                 <h2>Your Results:</h2>
                 <div class="stats-row">
-                    <div class="stat-item">
-                        <div class="stat-label">Final Score</div>
-                        <div class="stat-value" id="result-score">0</div>
+                    <div class="stat-item-result">
+                        <div class="stat-label-result">Final Score</div>
+                        <div class="stat-value-result" id="result-score">0</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Words Found</div>
-                        <div class="stat-value" id="result-count">0</div>
+                    <div class="stat-item-result">
+                        <div class="stat-label-result">Words Found</div>
+                        <div class="stat-value-result" id="result-count">0</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Time Used</div>
-                        <div class="stat-value" id="result-time">0:00</div>
+                    <div class="stat-item-result">
+                        <div class="stat-label-result">Time Used</div>
+                        <div class="stat-value-result" id="result-time">0:00</div>
                     </div>
                 </div>
                 
@@ -511,7 +594,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDXmeQgFUr_PKOXVvQKHu-RVMETveMAkEw",
             authDomain: "word-game-experiment.firebaseapp.com",
@@ -522,7 +604,6 @@
             measurementId: "G-47Z1R9CG91"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -559,7 +640,6 @@
         let startTime = null;
         let endTime = null;
 
-        // Get or create persistent user ID
         function getUserId() {
             let uid = localStorage.getItem('wordGameUserId');
             if (!uid) {
@@ -569,7 +649,6 @@
             return uid;
         }
 
-        // Get next game number from Firestore
         async function getNextGameNumber() {
             try {
                 const counterRef = db.collection('counters').doc('gameCounter');
@@ -636,29 +715,11 @@
             container.innerHTML = '';
             
             const numLetters = currentLetters.length;
-            
-            // Adjust for screen size
-            const isMobile = window.innerWidth <= 600;
-            const isSmallMobile = window.innerWidth <= 400;
-            
-            let radius, centerX, centerY, boxOffset;
-            
-            if (isSmallMobile) {
-                radius = 65;
-                centerX = 80;
-                centerY = 80;
-                boxOffset = 22.5;
-            } else if (isMobile) {
-                radius = 75;
-                centerX = 90;
-                centerY = 90;
-                boxOffset = 25;
-            } else {
-                radius = 80;
-                centerX = 100;
-                centerY = 100;
-                boxOffset = 30;
-            }
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            const radius = Math.min(containerWidth, containerHeight) / 2 - 35;
+            const centerX = containerWidth / 2;
+            const centerY = containerHeight / 2;
             
             currentLetters.forEach((letter, index) => {
                 const box = document.createElement('div');
@@ -666,8 +727,8 @@
                 box.textContent = letter;
                 
                 const angle = (index / numLetters) * 2 * Math.PI - Math.PI / 2;
-                const x = centerX + radius * Math.cos(angle) - boxOffset;
-                const y = centerY + radius * Math.sin(angle) - boxOffset;
+                const x = centerX + radius * Math.cos(angle) - 27.5;
+                const y = centerY + radius * Math.sin(angle) - 27.5;
                 
                 box.style.left = x + 'px';
                 box.style.top = y + 'px';
@@ -787,10 +848,6 @@
         function updateScoreDisplay() {
             const scoreElement = document.getElementById('score-value');
             scoreElement.textContent = currentScore;
-            scoreElement.style.animation = 'none';
-            setTimeout(() => {
-                scoreElement.style.animation = '';
-            }, 10);
         }
 
         let meaningTimeout;
@@ -951,7 +1008,13 @@
                 indicator.className = 'saving-indicator error';
             }
         }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (currentLetters.length > 0) {
+                displayLetters();
+            }
+        });
     </script>
 </body>
 </html>
-
