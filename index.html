@@ -476,28 +476,93 @@
             <button onclick="location.reload()" style="background: #6c757d;">Start New Session</button>
         </div>
     </div>
+<script>
+  const SMALL_WORLD = ['T','R','A','C','E'];
+  const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
+  const TIME_LIMIT  = 180;
 
-    <script>
-        const SMALL_WORLD = ['A', 'I', 'R', 'S', 'T'];
-        const BIG_WORLD = ['A', 'E', 'R', 'N', 'S', 'T', 'I', 'O'];
-        const TIME_LIMIT = 180;
-        const WORD_POINTS = {
-            // 2-Letter Words
-            "AI": 10, "AN": 1, "AR": 5, "AS": 1, "AT": 1, "ER": 3, "ES": 10, "IN": 1, "IS": 1, "IT": 1, "NO": 1, "ON": 1, "OR": 1, "OS": 10, "RE": 5, "SI": 10, "SO": 1, "TA": 10, "TI": 10, "TO": 1,
-            
-            // 3-Letter Words
-            "AIR": 3, "AIT": 10, "ANT": 5, "ARE": 1, "ART": 3, "ATE": 3, "EAR": 3, "EAT": 3, "ERA": 3, "ERN": 10, "ION": 5, "IRE": 5, "ITS": 1, "NET": 3, "NIT": 10, "NOR": 3, "NOT": 1, "OAR": 10, "OAT": 10, "ONE": 1, "ORE": 5, "RAN": 3, "RAT": 5, "RET": 10, "ROE": 10, "ROT": 5, "SAT": 3, "SEA": 1, "SEN": 10, "SER": 10, "SET": 1, "SIN": 3, "SIR": 3, "SIT": 3, "SON": 3, "SOT": 10, "TAN": 5, "TAR": 5, "TEA": 3, "TEN": 3, "TIE": 3, "TIN": 5, "TOE": 5, "TON": 5, "TOR": 10,
-            // 4-Letter Words
-            "AIRN": 10, "AIRS": 5, "AIRT": 10, "AITS": 10, "ANTE": 5, "ANTI": 5, "ANTS": 5, "ARTS": 3, "EARN": 3, "EARS": 3, "EAST": 3, "EATS": 3, "EONS": 5, "ETNA": 10, "INRO": 10, "INTO": 1, "IONS": 5, "IOTA": 10, "IRON": 3, "NAOI": 10, "NAOS": 10, "NEAR": 3, "NEAT": 3, "NEST": 3, "NETS": 3, "NITS": 10, "NOIR": 10, "NORI": 10, "NOSE": 3, "NOTE": 1, "OARS": 10, "OAST": 10, "OATS": 10, "ONES": 3, "ORES": 5, "RAIN": 3, "RANI": 10, "RANT": 10, "RASE": 5, "RATE": 3, "RATO": 10, "RATS": 5, "REIN": 5, "RENT": 3, "REST": 3, "RETS": 10, "RIAS": 10, "RIOT": 5, "RISE": 3, "RITE": 5, "ROAN": 10, "ROES": 10, "ROSE": 3, "ROTA": 10, "ROTE": 10, "ROTS": 5, "SANE": 5, "SARI": 10, "SATE": 10, "SATI": 10, "SEAR": 5, "SEAT": 3, "SENT": 3, "SERA": 10, "SINE": 10, "SIRE": 5, "SITE": 3, "SNIT": 10, "SNOT": 5, "SOAR": 5, "SONE": 10, "SORE": 3, "SORI": 10, "SORN": 10, "SORT": 3, "STAR": 3, "STIR": 3, "TARE": 10, "TARN": 10, "TARO": 10, "TARS": 5, "TEAR": 3, "TEAS": 5, "TENS": 5, "TERN": 10, "TIER": 5, "TIES": 5, "TINE": 10, "TINS": 5, "TIRE": 3, "TIRO": 10, "TOEA": 10, "TONE": 3, "TONS": 3, "TORE": 5, "TORI": 10, "TORN": 3,
-            // 5-Letter Words
-            "AEROS": 10, "AISLE": 5, "ANEW": 5, "ANISE": 10, "ANTES": 10, "ANTRE": 10, "ARISE": 3, "AROSE": 3, "ARSON": 5, "ASTER": 5, "ASTIR": 10, "ATONE": 5, "ERATO": 10, "INERT": 5, "INTRO": 5, "IRATE": 5, "IRONE": 10, "IRONS": 3, "NARES": 10, "NARIS": 10, "NITER": 10, "NITRE": 10, "NITRO": 10, "NOISE": 3, "NORIA": 10, "NOTES": 3, "OATEN": 10, "OATER": 10, "ORATE": 10, "ORIENT": 5, "OSIER": 10, "RAISE": 3, "RAINS": 3, "RANTS": 10, "RATIO": 5, "REINS": 5, "RENTS": 3, "RESIN": 10, "RETIA": 10, "RINSE": 5, "RIOTS": 5, "RISEN": 5, "ROAST": 5, "ROSIN": 10, "SAINT": 3, "SATIN": 5, "SENOR": 10, "SENTI": 10, "SERAI": 10, "SERIN": 10, "SITAR": 10, "SNARE": 5, "SNORT": 5, "SONAR": 5, "STAIN": 3, "STAIR": 3, "STARE": 3, "STERN": 5, "STOAE": 10, "STOAI": 10, "STONE": 3, "STORE": 3, "STRIA": 10, "TASER": 5, "TENIA": 10, "TENOR": 5, "TERNS": 10, "TIERS": 5, "TONER": 10, "TRAIN": 3, "TRIOS": 5,
-            // 6-Letter Words
-            "ACTION": 3, "AORIST": 10, "ARISEN": 5, "ARTIST": 3, "ASTERN": 5, "ATONER": 10, "ATONES": 5, "INSERT": 3, "INTERN": 5, "IRONES": 10, "NOTARI": 10, "ORIENT": 5, "ORNATE": 5, "RATION": 5, "RATIOS": 5, "RETAIN": 5, "RETINA": 5, "SENIOR": 3, "SENORA": 10, "STRAIN": 3, "TENSOR": 10, "TRANSI": 10,
-            // 7-Letter Words
-            "ACTIONS": 3, "AORISTS": 10, "ARSONIST": 5, "ENTRAIN": 5, "NOTARIES": 10, "ORIENTS": 5, "ORATION": 5, "RATINES": 10, "RATIONS": 5, "RETAINS": 5, "RETINAS": 5, "STATION": 3,
-            // 8-Letter Words
-            "ORATIONS": 5, "SENORITA": 5, "NOTATION": 5
-        };
+  // WORD_POINTS: uppercase keys, scores as integers
+  // Notes:
+  // - 3-letter base=1, 4-letter base=2, 5-letter base=5
+  // - Light rarity tilt applied uniformly (no hand-picked bonuses)
+  // - // ★ marks words possible in the SMALL_WORLD (TRACE) only
+  const WORD_POINTS = {
+    // 2-Letter Words (you asked to include)
+    "AT": 1, // ★
+
+    // 3-Letter Words (base ~1)
+    "ACE": 1, // ★
+    "ACT": 1, // ★
+    "ARC": 1, // ★
+    "ARE": 1, // ★
+    "ART": 1, // ★
+    "ATE": 1, // ★
+    "CAR": 1, // ★
+    "CAT": 1, // ★
+    "EAR": 1, // ★
+    "EAT": 1, // ★
+    "ERA": 1, // ★
+    "ETC": 1, // ★ (abbr.; include if your list allows)
+    "RAT": 1, // ★
+    "RET": 1, // ★
+    "TAR": 1, // ★
+    "TEA": 1, // ★
+    "AXE": 1,
+    "CRY": 1,
+    "RYE": 1,
+    "TRY": 1,
+    "RAY": 1,
+    "YAT": 1,   // dialectal in some lists; keep if allowed
+    "YEA": 1,
+    "YET": 1,
+    "TAX": 1,
+
+    // 4-Letter Words (base ~2)
+    "ACRE": 2, // ★
+    "ACER": 3, // ★ (genus; some lists treat as proper → adjust if needed)
+    "ARET": 3, // ★ (archaic in some lists)
+    "ARTY": 2,
+    "CARE": 2, // ★
+    "CART": 2, // ★
+    "RACE": 2, // ★
+    "RACY": 2,
+    "RATE": 2, // ★
+    "TACE": 3, // ★ (rare/archaic “be silent”)
+    "TARE": 2, // ★
+    "TEAR": 2, // ★
+    "TERA": 2, // ★ (metric prefix)
+    "TRAY": 2,
+    "YEAR": 2,
+    "X RAY": 2, // If you prefer unhyphenated "XRAY": use "XRAY": 2
+    "EZRA": 2,  // proper name; include only if your list allows
+    "RAZE": 4,
+    "ZETA": 4,
+    "CZAR": 3,
+
+    // 5-Letter Words (base ~5)
+    "CARET": 10, // ★
+    "CARTE": 10, // ★
+    "CATER": 8,  // ★
+    "CRATE": 8,  // ★
+    "CRETA": 8,  // ★ (Latin-origin; include if allowed)
+    "REACT": 6,  // ★
+    "RECTA": 8,  // ★ (math/Latin plural in some lists)
+    "TRACE": 6,  // ★
+    "EXACT": 5,
+    "EXTRA": 5,
+    "TEARY": 6,
+    "CRAZE": 10,
+    "CRAZY": 6,
+    "TAXER": 10,
+    "AZTEC": 8,  // proper ethnonym; include if your list allows
+  };
+
+  // If you prefer to exclude proper/dialect/abbr items,
+  // remove: EZRA, ACER (if proper), AZTEC, YAT, ETC, CRETA/RECTA (depending on your dictionary),
+  // and keep the rest unchanged.
+</script>
+
+
 
         let participantId = '';
         let version = '';
@@ -853,3 +918,4 @@
     </script>
 </body>
 </html>
+
