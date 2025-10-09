@@ -15,16 +15,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow-x: hidden;
         }
         
         .container {
             background: white;
             border-radius: 20px;
-            padding: 40px;
+            padding: 25px;
             max-width: 700px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -408,27 +410,36 @@
 
         <!-- Game Screen -->
         <div class="screen" id="game-screen">
-            <div class="participant-id" id="participant-info"></div>
-            <h1>Word Generation Challenge</h1>
-            <div style="text-align: center;">
-                <span class="version-badge" id="version-badge"></span>
+            <h1 style="margin-bottom: 10px; font-size: 24px;">Word Generation Challenge</h1>
+            
+            <div class="game-layout">
+                <div class="side-panel left-panel">
+                    <div class="timer-compact" id="timer">3:00</div>
+                    <div class="word-count-display">
+                        <div style="color: #28a745; font-weight: bold; font-size: 20px;" id="word-count">0</div>
+                        <div style="font-size: 11px; color: #666;">Valid</div>
+                    </div>
+                    <div class="word-count-display">
+                        <div style="color: #e74c3c; font-weight: bold; font-size: 20px;" id="invalid-count">0</div>
+                        <div style="font-size: 11px; color: #666;">Invalid</div>
+                    </div>
+                </div>
+                
+                <div class="center-panel">
+                    <div class="letter-display-compact" id="letter-display"></div>
+                </div>
+                
+                <div class="side-panel right-panel">
+                    <div class="score-display-compact">
+                        <div class="score-label-compact">Score</div>
+                        <div class="score-value-compact" id="score-value">0</div>
+                    </div>
+                </div>
             </div>
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                Create as many words as possible using these letters:
-            </p>
             
-            <div class="letter-display" id="letter-display"></div>
+            <div class="word-meaning-compact" id="word-meaning"></div>
             
-            <div class="score-display">
-                <div class="score-label">Your Score</div>
-                <div class="score-value" id="score-value">0</div>
-            </div>
-            
-            <div class="timer" id="timer">3:00</div>
-            
-            <div class="word-meaning" id="word-meaning"></div>
-            
-            <div class="word-input-area">
+            <div class="word-input-area-compact">
                 <input 
                     type="text" 
                     id="word-input" 
@@ -436,15 +447,11 @@
                     autocomplete="off"
                 >
                 <div class="input-feedback" id="input-feedback"></div>
-                <div class="word-list" id="word-list"></div>
             </div>
             
-            <div style="text-align: center; color: #666; margin-top: 20px;">
-                Valid words: <strong id="word-count">0</strong>
-                <span style="color: #e74c3c; margin-left: 15px;">Invalid: <strong id="invalid-count">0</strong></span>
-            </div>
+            <div class="word-list-compact" id="word-list"></div>
             
-            <button class="done-button" onclick="confirmDone()">I am done ✓</button>
+            <button class="done-button-compact" onclick="confirmDone()">I am done ✓</button>
         </div>
 
         <!-- Results Screen -->
@@ -598,18 +605,6 @@
                 currentLetters = [...BIG_WORLD];
             }
             
-            document.getElementById('participant-info').textContent = 
-                `User: ${userId} | Game #${gameNumber} | Version: ${version}`;
-            
-            const badge = document.getElementById('version-badge');
-            if (version === 'small-world') {
-                badge.textContent = 'Small World: ' + SMALL_WORLD.join(' ');
-                badge.className = 'version-badge small';
-            } else {
-                badge.textContent = 'Big World: ' + BIG_WORLD.join(' ');
-                badge.className = 'version-badge big';
-            }
-            
             showScreen('game-screen');
             startGame();
         }
@@ -642,9 +637,29 @@
             container.innerHTML = '';
             
             const numLetters = currentLetters.length;
-            const radius = 120;
-            const centerX = 150;
-            const centerY = 150;
+            
+            // Adjust for screen size
+            const isMobile = window.innerWidth <= 600;
+            const isSmallMobile = window.innerWidth <= 400;
+            
+            let radius, centerX, centerY, boxOffset;
+            
+            if (isSmallMobile) {
+                radius = 65;
+                centerX = 80;
+                centerY = 80;
+                boxOffset = 22.5;
+            } else if (isMobile) {
+                radius = 75;
+                centerX = 90;
+                centerY = 90;
+                boxOffset = 25;
+            } else {
+                radius = 80;
+                centerX = 100;
+                centerY = 100;
+                boxOffset = 30;
+            }
             
             currentLetters.forEach((letter, index) => {
                 const box = document.createElement('div');
@@ -652,8 +667,8 @@
                 box.textContent = letter;
                 
                 const angle = (index / numLetters) * 2 * Math.PI - Math.PI / 2;
-                const x = centerX + radius * Math.cos(angle) - 30;
-                const y = centerY + radius * Math.sin(angle) - 30;
+                const x = centerX + radius * Math.cos(angle) - boxOffset;
+                const y = centerY + radius * Math.sin(angle) - boxOffset;
                 
                 box.style.left = x + 'px';
                 box.style.top = y + 'px';
