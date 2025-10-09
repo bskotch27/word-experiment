@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Game Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .preview {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .export-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .option-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .option-btn.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Export Game Data</h1>
+        
+        <div class="info-box">
+            <strong>Connected to:</strong> word-game-experiment
+        </div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Total Games</div>
+                <div class="stat-value" id="total-games">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Unique Users</div>
+                <div class="stat-value" id="unique-users">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Words</div>
+                <div class="stat-value" id="total-words">0</div>
+            </div>
+        </div>
+        
+        <div class="status loading" id="status">
+            Loading data from Firebase...
+        </div>
+        
+        <div class="export-options" id="export-options" style="display: none;">
+            <button class="option-btn active" id="detailed-btn" onclick="setExportType('detailed')">
+                <strong>📋 Detailed Export</strong><br>
+                <small>One row per word</small>
+            </button>
+            <button class="option-btn" id="summary-btn" onclick="setExportType('summary')">
+                <strong>📊 Summary Export</strong><br>
+                <small>One row per game</small>
+            </button>
+        </div>
+        
+        <button id="export-btn" onclick="exportData()" style="display: none;">
+            Download CSV
+        </button>
+        
+        <button onclick="location.href='index.html'" style="background: #6c757d; display: none;" id="back-btn">
+            ← Back to Game
+        </button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXmeQgFUr_PKOXVvQKHu-RVMETveMAkEw",
+            authDomain: "word-game-experiment.firebaseapp.com",
+            projectId: "word-game-experiment",
+            storageBucket: "word-game-experiment.firebasestorage.app",
+            messagingSenderId: "591494474863",
+            appId: "1:591494474863:web:f9af5737dc27f9e7da319a",
+            measurementId: "G-47Z1R9CG91"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let gameData = [];
+        let exportType = 'detailed';
+
+        function setExportType(type) {
+            exportType = type;
+            document.getElementById('detailed-btn').classList.remove('active');
+            document.getElementById('summary-btn').classList.remove('active');
+            if (type === 'detailed') {
+                document.getElementById('detailed-btn').classList.add('active');
+            } else {
+                document.getElementById('summary-btn').classList.add('active');
+            }
+        }
+
+        async function loadData() {
+            try {
+                const snapshot = await db.collection('games').orderBy('gameNumber').get();
+                gameData = [];
+                
+                snapshot.forEach(doc => {
+                    gameData.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                if (gameData.length === 0) {
+                    document.getElementById('status').textContent = 'No games found in database.';
+                    document.getElementById('status').className = 'status error';
+                    return;
+                }
+
+                // Calculate statistics
+                const uniqueUsers = new Set(gameData.map(g => g.userId)).size;
+                const totalWords = gameData.reduce((sum, g) => sum + (g.words?.length || 0), 0);
+
+                document.getElementById('total-games').textContent = gameData.length;
+                document.getElementById('unique-users').textContent = uniqueUsers;
+                document.getElementById('total-words').textContent = totalWords;
+
+                document.getElementById('stats').style.display = 'grid';
+                document.getElementById('export-options').style.display = 'grid';
+                document.getElementById('export-btn').style.display = 'block';
+                document.getElementById('back-btn').style.display = 'block';
+                document.getElementById('status').textContent = `✅ Loaded ${gameData.length} games successfully!`;
+                document.getElementById('status').className = 'status success';
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('status').textContent = `❌ Error: ${error.message}`;
+                document.getElementById('status').className = 'status error';
+            }
+        }
+
+        function exportData() {
+            if (exportType === 'detailed') {
+                exportDetailedCSV();
+            } else {
+                exportSummaryCSV();
+            }
+        }
+
+        function exportDetailedCSV() {
+            // Create CSV with one row per word
+            let csv = 'Game_Number,User_ID,World_Type,Letters,Game_Start_Time,Game_End_Time,Time_Used_Seconds,Completed_Early,Total_Game_Score,Word,Word_Points,Is_Valid,Word_Order,Word_Timestamp,User_Agent,Platform,Language\n';
+            
+            gameData.forEach(game => {
+                const words = game.words || [];
+                
+                words.forEach(word => {
+                    const row = [
+                        game.gameNumber || '',
+                        game.userId || '',
+                        game.worldType || game.version || '',
+                        game.letters || '',
+                        game.startTime || '',
+                        game.endTime || '',
+                        game.timeUsedSeconds || '',
+                        game.completedEarly || false,
+                        game.score || 0,
+                        word.word || '',
+                        word.points || 0,
+                        word.valid || false,
+                        word.order || '',
+                        word.timestamp || '',
+                        game.deviceInfo?.userAgent || '',
+                        game.deviceInfo?.platform || '',
+                        game.deviceInfo?.language || ''
+                    ];
+                    
+                    csv += row.map(val => {
+                        const str = String(val);
+                        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                            return '"' + str.replace(/"/g, '""') + '"';
+                        }
+                        return str;
+                    }).join(',') + '\n';
+                });
+            });
+            
+            downloadCSV(csv, 'word_game_data_detailed.csv');
+        }
+
+        function exportSummaryCSV() {
+            // Create CSV with one row per game
+            let csv = 'Game_Number,User_ID,World_Type,Letters,Start_Time,End_Time,Time_Used_Seconds,Completed_Early,Total_Score,Valid_Words_Count,Invalid_Words_Count,Valid_Words_List,Invalid_Words_List,User_Agent,Platform,Language\n';
+            
+            gameData.forEach(game => {
+                const validWords = (game.words || [])
+                    .filter(w => w.valid)
+                    .map(w => `${w.word}(${w.points}pt)`)
+                    .join('; ');
+                
+                const invalidWords = (game.words || [])
+                    .filter(w => !w.valid)
+                    .map(w => w.word)
+                    .join('; ');
+                
+                const row = [
+                    game.gameNumber || '',
+                    game.userId || '',
+                    game.worldType || game.version || '',
+                    game.letters || '',
+                    game.startTime || '',
+                    game.endTime || '',
+                    game.timeUsedSeconds || '',
+                    game.completedEarly || false,
+                    game.score || 0,
+                    game.validWordCount || 0,
+                    game.invalidWordCount || 0,
+                    validWords,
+                    invalidWords,
+                    game.deviceInfo?.userAgent || '',
+                    game.deviceInfo?.platform || '',
+                    game.deviceInfo?.language || ''
+                ];
+                
+                csv += row.map(val => {
+                    const str = String(val);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return '"' + str.replace(/"/g, '""') + '"';
+                    }
+                    return str;
+                }).join(',') + '\n';
+            });
+            
+            downloadCSV(csv, 'word_game_data_summary.csv');
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            document.getElementById('status').textContent = `✅ Downloaded ${filename}!`;
+            document.getElementById('status').className = 'status success';
+        }
+
+        // Load data when page loads
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>
