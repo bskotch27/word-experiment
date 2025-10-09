@@ -32,7 +32,7 @@
         
         h1 {
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             text-align: center;
             font-size: 24px;
         }
@@ -95,23 +95,28 @@
         }
 
         /* Game Layout */
-        .game-header {
+        .game-container {
+            position: relative;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: center;
+            margin: 5px 0;
         }
 
         .timer-box {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 15px 12px;
             border-radius: 12px;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            text-align: center;
+            min-width: 65px;
         }
 
         .timer-box.warning {
@@ -120,69 +125,46 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.05); }
         }
 
         .score-box {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
             background: linear-gradient(135deg, #28a745 0%, #20883b 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 15px 12px;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
             text-align: center;
+            min-width: 65px;
         }
 
         .score-label {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
             opacity: 0.9;
+            margin-bottom: 3px;
         }
 
         .score-value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             line-height: 1;
         }
 
         .stats-box {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 8px 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .stat-number.valid {
-            color: #28a745;
-        }
-
-        .stat-number.invalid {
-            color: #e74c3c;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #666;
-            text-transform: uppercase;
+            display: none;
         }
         
         .letter-display {
             position: relative;
-            width: 240px;
-            height: 240px;
-            margin: 20px auto;
+            width: 380px;
+            height: 380px;
+            margin: 10px auto;
         }
         
         .letter-box {
@@ -202,6 +184,7 @@
             cursor: pointer;
             user-select: none;
             touch-action: none;
+            z-index: 2;
         }
         
         .letter-box:hover {
@@ -237,12 +220,13 @@
 
         .connection-line {
             position: absolute;
-            height: 3px;
+            height: 4px;
             background: linear-gradient(90deg, #28a745, #20883b);
             transform-origin: left center;
             pointer-events: none;
             z-index: 1;
             box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
+            border-radius: 2px;
         }
 
         .current-word-display {
@@ -250,30 +234,29 @@
             font-size: 32px;
             font-weight: bold;
             color: #667eea;
-            min-height: 50px;
+            min-height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 10px 0;
+            margin: 5px 0 0 0;
             letter-spacing: 3px;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
             border-radius: 10px;
-            padding: 10px;
+            padding: 8px;
         }
 
         .touch-hint {
             text-align: center;
             color: #667eea;
             font-size: 13px;
-            margin-top: -5px;
-            margin-bottom: 10px;
+            margin: 5px 0 10px 0;
             font-weight: 500;
         }
 
         .mode-toggle {
             display: none;
             text-align: center;
-            margin: 10px 0;
+            margin: 10px 0 8px 0;
         }
 
         .mode-btn {
@@ -301,13 +284,13 @@
         
         .word-meaning {
             text-align: center;
-            padding: 10px 15px;
+            padding: 8px 15px;
             background: #f8f9fa;
             border-radius: 8px;
-            margin: 15px 0;
+            margin: 10px 0;
             font-size: 14px;
             color: #555;
-            min-height: 40px;
+            min-height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -332,7 +315,7 @@
             font-size: 18px;
             border: 2px solid #ddd;
             border-radius: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             transition: border-color 0.3s;
         }
         
@@ -344,20 +327,20 @@
         .input-feedback {
             font-size: 14px;
             color: #e74c3c;
-            margin-bottom: 8px;
-            min-height: 20px;
+            margin-bottom: 6px;
+            min-height: 18px;
         }
         
         .word-list {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin: 15px 0;
+            margin: 10px 0;
             padding: 12px;
             background: #f8f9fa;
             border-radius: 10px;
-            min-height: 80px;
-            max-height: 120px;
+            min-height: 70px;
+            max-height: 110px;
             overflow-y: auto;
         }
         
@@ -394,7 +377,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            margin: 15px auto;
+            margin: 10px auto;
             display: block;
         }
         
@@ -477,38 +460,48 @@
         /* Mobile Responsive */
         @media (max-width: 600px) {
             body {
-                padding: 10px;
+                padding: 8px;
             }
 
             .container {
-                padding: 15px;
+                padding: 12px;
+                max-height: 98vh;
             }
 
             h1 {
-                font-size: 20px;
-                margin-bottom: 10px;
-            }
-
-            .game-header {
-                justify-content: center;
-            }
-
-            .timer-box {
-                font-size: 24px;
-                padding: 8px 16px;
-            }
-
-            .score-box {
-                padding: 8px 16px;
-            }
-
-            .score-value {
-                font-size: 28px;
+                font-size: 18px;
+                margin-bottom: 5px;
             }
 
             .letter-display {
-                width: 200px;
-                height: 200px;
+                width: 280px;
+                height: 280px;
+                margin: 8px auto;
+            }
+
+            .game-container {
+                margin: 8px 0;
+            }
+
+            .timer-box {
+                font-size: 20px;
+                padding: 12px 10px;
+                min-width: 55px;
+                left: -5px;
+            }
+
+            .score-box {
+                padding: 12px 10px;
+                min-width: 55px;
+                right: -5px;
+            }
+
+            .score-value {
+                font-size: 24px;
+            }
+
+            .score-label {
+                font-size: 9px;
             }
 
             .letter-box {
@@ -518,38 +511,65 @@
             }
 
             .current-word-display {
-                font-size: 28px;
-                min-height: 45px;
+                font-size: 24px;
+                min-height: 40px;
                 letter-spacing: 2px;
+                padding: 6px;
             }
 
             .touch-hint {
-                font-size: 12px;
+                font-size: 11px;
+                margin: 3px 0 8px 0;
+            }
+
+            .word-meaning {
+                font-size: 13px;
+                padding: 6px 12px;
+                min-height: 32px;
+                margin: 8px 0;
             }
 
             .word-input-area input {
-                padding: 12px;
+                padding: 10px;
                 font-size: 16px;
             }
 
             .word-list {
-                max-height: 100px;
+                max-height: 90px;
                 min-height: 60px;
+                margin: 8px 0;
+                padding: 10px;
             }
 
-            .stat-number {
-                font-size: 20px;
+            .done-button {
+                padding: 10px 25px;
+                font-size: 14px;
+                margin: 8px auto;
             }
         }
 
         @media (max-width: 400px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
             h1 {
-                font-size: 18px;
+                font-size: 16px;
+                margin-bottom: 4px;
             }
 
             .letter-display {
-                width: 180px;
-                height: 180px;
+                width: 240px;
+                height: 240px;
+                margin: 5px auto;
+            }
+
+            .game-container {
+                margin: 5px 0;
             }
 
             .letter-box {
@@ -558,26 +578,62 @@
                 font-size: 20px;
             }
 
-            .timer-box, .score-box {
-                padding: 6px 12px;
+            .timer-box {
+                font-size: 18px;
+                padding: 10px 8px;
+                min-width: 50px;
+                left: -10px;
             }
 
-            .timer-box {
-                font-size: 20px;
+            .score-box {
+                padding: 10px 8px;
+                min-width: 50px;
+                right: -10px;
             }
 
             .score-value {
-                font-size: 24px;
+                font-size: 20px;
+            }
+
+            .score-label {
+                font-size: 8px;
             }
 
             .current-word-display {
-                font-size: 24px;
-                min-height: 40px;
+                font-size: 20px;
+                min-height: 36px;
                 letter-spacing: 1px;
+                padding: 5px;
             }
 
             .touch-hint {
-                font-size: 11px;
+                font-size: 10px;
+                margin: 2px 0 5px 0;
+            }
+
+            .word-meaning {
+                font-size: 12px;
+                padding: 5px 10px;
+                min-height: 28px;
+                margin: 5px 0;
+            }
+
+            .word-list {
+                max-height: 80px;
+                min-height: 50px;
+                margin: 5px 0;
+                padding: 8px;
+            }
+
+            .word-tag {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .done-button {
+                padding: 8px 20px;
+                font-size: 13px;
+                margin: 5px auto;
             }
         }
     </style>
@@ -612,29 +668,19 @@
         <div class="screen" id="game-screen">
             <h1>Word Generation Challenge</h1>
             
-            <div class="game-header">
+            <div class="current-word-display" id="current-word-display"></div>
+            <div class="touch-hint">Touch and connect letters to form words</div>
+            
+            <div class="game-container">
                 <div class="timer-box" id="timer">3:00</div>
+                
+                <div class="letter-display" id="letter-display"></div>
+                
                 <div class="score-box">
                     <div class="score-label">Score</div>
                     <div class="score-value" id="score-value">0</div>
                 </div>
             </div>
-
-            <div class="stats-box">
-                <div class="stat-item">
-                    <div class="stat-number valid" id="word-count">0</div>
-                    <div class="stat-label">Valid</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number invalid" id="invalid-count">0</div>
-                    <div class="stat-label">Invalid</div>
-                </div>
-            </div>
-            
-            <div class="current-word-display" id="current-word-display"></div>
-            <div class="touch-hint">Touch and connect letters to form words</div>
-            
-            <div class="letter-display" id="letter-display"></div>
             
             <div class="word-meaning" id="word-meaning"></div>
             
@@ -874,7 +920,9 @@
             const numLetters = currentLetters.length;
             const containerWidth = container.offsetWidth;
             const containerHeight = container.offsetHeight;
-            const radius = Math.min(containerWidth, containerHeight) / 2 - 35;
+            
+            // Larger radius for better spacing
+            const radius = Math.min(containerWidth, containerHeight) / 2 - 40;
             const centerX = containerWidth / 2;
             const centerY = containerHeight / 2;
             
@@ -1278,9 +1326,6 @@
                 `;
                 container.appendChild(tag);
             });
-            
-            document.getElementById('word-count').textContent = currentWords.length;
-            document.getElementById('invalid-count').textContent = invalidWords.length;
         }
 
         async function showResults() {
