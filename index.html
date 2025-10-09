@@ -358,6 +358,26 @@
             background: #f3e5f5;
             color: #7b1fa2;
         }
+
+        .saving-indicator {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .saving-indicator.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .saving-indicator.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -468,123 +488,108 @@
                     <div id="result-invalid-words" style="margin: 10px 0; color: #e74c3c; line-height: 2;"></div>
                 </div>
 
+                <div class="saving-indicator" id="saving-indicator">
+                    📊 Saving your results...
+                </div>
+
                 <div class="highlight" style="margin-top: 30px;">
                     Thank you for participating! Your responses have been recorded.
                 </div>
             </div>
-            <button onclick="downloadResults()">Download Results (CSV)</button>
-            <button onclick="location.reload()" style="background: #6c757d;">Start New Session</button>
+            <button onclick="location.reload()" style="background: #667eea;">Play Again</button>
         </div>
     </div>
-<script>
-  const SMALL_WORLD = ['T','R','A','C','E'];
-  const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
-  const TIME_LIMIT  = 180;
 
-  // WORD_POINTS: uppercase keys, scores as integers
-  // Notes:
-  // - 3-letter base=1, 4-letter base=2, 5-letter base=5
-  // - Light rarity tilt applied uniformly (no hand-picked bonuses)
-  // - // ★ marks words possible in the SMALL_WORLD (TRACE) only
-  const WORD_POINTS = {
-    // 2-Letter Words (you asked to include)
-    "AT": 1, // ★
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-    // 3-Letter Words (base ~1)
-    "ACE": 1, // ★
-    "ACT": 1, // ★
-    "ARC": 1, // ★
-    "ARE": 1, // ★
-    "ART": 1, // ★
-    "ATE": 1, // ★
-    "CAR": 1, // ★
-    "CAT": 1, // ★
-    "EAR": 1, // ★
-    "EAT": 1, // ★
-    "ERA": 1, // ★
-    "ETC": 1, // ★ (abbr.; include if your list allows)
-    "RAT": 1, // ★
-    "RET": 1, // ★
-    "TAR": 1, // ★
-    "TEA": 1, // ★
-    "AXE": 1,
-    "CRY": 1,
-    "RYE": 1,
-    "TRY": 1,
-    "RAY": 1,
-    "YAT": 1,   // dialectal in some lists; keep if allowed
-    "YEA": 1,
-    "YET": 1,
-    "TAX": 1,
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXmeQgFUr_PKOXVvQKHu-RVMETveMAkEw",
+            authDomain: "word-game-experiment.firebaseapp.com",
+            projectId: "word-game-experiment",
+            storageBucket: "word-game-experiment.firebasestorage.app",
+            messagingSenderId: "591494474863",
+            appId: "1:591494474863:web:f9af5737dc27f9e7da319a",
+            measurementId: "G-47Z1R9CG91"
+        };
 
-    // 4-Letter Words (base ~2)
-    "ACRE": 2, // ★
-    "ACER": 3, // ★ (genus; some lists treat as proper → adjust if needed)
-    "ARET": 3, // ★ (archaic in some lists)
-    "ARTY": 2,
-    "CARE": 2, // ★
-    "CART": 2, // ★
-    "RACE": 2, // ★
-    "RACY": 2,
-    "RATE": 2, // ★
-    "TACE": 3, // ★ (rare/archaic “be silent”)
-    "TARE": 2, // ★
-    "TEAR": 2, // ★
-    "TERA": 2, // ★ (metric prefix)
-    "TRAY": 2,
-    "YEAR": 2,
-    "X RAY": 2, // If you prefer unhyphenated "XRAY": use "XRAY": 2
-    "EZRA": 2,  // proper name; include only if your list allows
-    "RAZE": 4,
-    "ZETA": 4,
-    "CZAR": 3,
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    // 5-Letter Words (base ~5)
-    "CARET": 10, // ★
-    "CARTE": 10, // ★
-    "CATER": 8,  // ★
-    "CRATE": 8,  // ★
-    "CRETA": 8,  // ★ (Latin-origin; include if allowed)
-    "REACT": 6,  // ★
-    "RECTA": 8,  // ★ (math/Latin plural in some lists)
-    "TRACE": 6,  // ★
-    "EXACT": 5,
-    "EXTRA": 5,
-    "TEARY": 6,
-    "CRAZE": 10,
-    "CRAZY": 6,
-    "TAXER": 10,
-    "AZTEC": 8,  // proper ethnonym; include if your list allows
-  };
+        const SMALL_WORLD = ['T','R','A','C','E'];
+        const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
+        const TIME_LIMIT  = 180;
 
-  // If you prefer to exclude proper/dialect/abbr items,
-  // remove: EZRA, ACER (if proper), AZTEC, YAT, ETC, CRETA/RECTA (depending on your dictionary),
-  // and keep the rest unchanged.
-</script>
+        const WORD_POINTS = {
+            "AT": 1,
+            "ACE": 1, "ACT": 1, "ARC": 1, "ARE": 1, "ART": 1, "ATE": 1,
+            "CAR": 1, "CAT": 1, "EAR": 1, "EAT": 1, "ERA": 1, "ETC": 1,
+            "RAT": 1, "RET": 1, "TAR": 1, "TEA": 1, "AXE": 1, "CRY": 1,
+            "RYE": 1, "TRY": 1, "RAY": 1, "YAT": 1, "YEA": 1, "YET": 1, "TAX": 1,
+            "ACRE": 2, "ACER": 3, "ARET": 3, "ARTY": 2, "CARE": 2, "CART": 2,
+            "RACE": 2, "RACY": 2, "RATE": 2, "TACE": 3, "TARE": 2, "TEAR": 2,
+            "TERA": 2, "TRAY": 2, "YEAR": 2, "XRAY": 2, "EZRA": 2, "RAZE": 4,
+            "ZETA": 4, "CZAR": 3,
+            "CARET": 10, "CARTE": 10, "CATER": 8, "CRATE": 8, "CRETA": 8,
+            "REACT": 6, "RECTA": 8, "TRACE": 6, "EXACT": 5, "EXTRA": 5,
+            "TEARY": 6, "CRAZE": 10, "CRAZY": 6, "TAXER": 10, "AZTEC": 8,
+        };
 
-
-
-        let participantId = '';
+        let userId = '';
+        let gameNumber = 0;
         let version = '';
         let currentLetters = [];
         let currentWords = [];
+        let wordTimestamps = [];
         let invalidWords = [];
+        let invalidWordTimestamps = [];
         let currentScore = 0;
         let timerInterval = null;
         let timeRemaining = TIME_LIMIT;
         let startTime = null;
         let endTime = null;
 
+        // Get or create persistent user ID
+        function getUserId() {
+            let uid = localStorage.getItem('wordGameUserId');
+            if (!uid) {
+                uid = 'U' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('wordGameUserId', uid);
+            }
+            return uid;
+        }
+
+        // Get next game number from Firestore
+        async function getNextGameNumber() {
+            try {
+                const counterRef = db.collection('counters').doc('gameCounter');
+                const result = await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(counterRef);
+                    let newCount = 1;
+                    if (doc.exists) {
+                        newCount = (doc.data().count || 0) + 1;
+                    }
+                    transaction.set(counterRef, { count: newCount });
+                    return newCount;
+                });
+                return result;
+            } catch (error) {
+                console.error('Error getting game number:', error);
+                return Date.now();
+            }
+        }
+
         function getWordPoints(word) {
             return WORD_POINTS[word] || 1;
         }
 
-        function generateParticipantId() {
-            return 'P' + Date.now().toString().slice(-8);
-        }
-
-        function startExperiment() {
-            participantId = generateParticipantId();
+        async function startExperiment() {
+            userId = getUserId();
+            gameNumber = await getNextGameNumber();
             version = Math.random() < 0.5 ? 'small-world' : 'big-world';
             
             if (version === 'small-world') {
@@ -593,14 +598,15 @@
                 currentLetters = [...BIG_WORLD];
             }
             
-            document.getElementById('participant-info').textContent = `Participant ID: ${participantId} | Version: ${version}`;
+            document.getElementById('participant-info').textContent = 
+                `User: ${userId} | Game #${gameNumber} | Version: ${version}`;
             
             const badge = document.getElementById('version-badge');
             if (version === 'small-world') {
-                badge.textContent = 'Small World: A E R N S';
+                badge.textContent = 'Small World: ' + SMALL_WORLD.join(' ');
                 badge.className = 'version-badge small';
             } else {
-                badge.textContent = 'Big World: A E R N S T I O';
+                badge.textContent = 'Big World: ' + BIG_WORLD.join(' ');
                 badge.className = 'version-badge big';
             }
             
@@ -610,7 +616,9 @@
 
         function startGame() {
             currentWords = [];
+            wordTimestamps = [];
             invalidWords = [];
+            invalidWordTimestamps = [];
             currentScore = 0;
             timeRemaining = TIME_LIMIT;
             startTime = new Date();
@@ -733,8 +741,11 @@
                 return;
             }
             
+            const timestamp = new Date().toISOString();
+            
             if (!WORD_POINTS[word]) {
                 invalidWords.push(word);
+                invalidWordTimestamps.push(timestamp);
                 input.value = '';
                 feedback.textContent = '';
                 updateWordDisplay();
@@ -749,6 +760,7 @@
             }
             
             currentWords.push(word);
+            wordTimestamps.push(timestamp);
             currentScore += getWordPoints(word);
             input.value = '';
             feedback.textContent = '';
@@ -774,10 +786,14 @@
             
             if (points === 10) {
                 return 'Rare word! Worth 10 points';
-            } else if (points === 5) {
-                return 'Uncommon word! Worth 5 points';
-            } else if (points === 3) {
-                return 'Good word! Worth 3 points';
+            } else if (points === 8) {
+                return 'Uncommon word! Worth 8 points';
+            } else if (points >= 5) {
+                return 'Good word! Worth ' + points + ' points';
+            } else if (points >= 3) {
+                return 'Nice word! Worth ' + points + ' points';
+            } else if (points >= 2) {
+                return 'Good word! Worth ' + points + ' points';
             } else {
                 return 'Common word! Worth 1 point';
             }
@@ -830,7 +846,7 @@
             document.getElementById('invalid-count').textContent = invalidWords.length;
         }
 
-        function showResults() {
+        async function showResults() {
             const timeUsed = TIME_LIMIT - timeRemaining;
             const minutesUsed = Math.floor(timeUsed / 60);
             const secondsUsed = timeUsed % 60;
@@ -854,7 +870,7 @@
             
             showScreen('results-screen');
             
-            storeResults();
+            await saveToFirebase();
         }
 
         function showScreen(screenId) {
@@ -864,58 +880,63 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        function storeResults() {
-            const timeUsed = TIME_LIMIT - timeRemaining;
+        async function saveToFirebase() {
+            const indicator = document.getElementById('saving-indicator');
+            indicator.textContent = '📊 Saving your results...';
+            indicator.className = 'saving-indicator';
             
-            const wordData = currentWords.map(word => ({
-                word: word,
-                points: getWordPoints(word),
-                valid: true
-            }));
-            
-            const invalidWordData = invalidWords.map(word => ({
-                word: word,
-                points: 0,
-                valid: false
-            }));
-            
-            const results = {
-                participantId: participantId,
-                version: version,
-                timestamp: new Date().toISOString(),
-                letters: currentLetters.join(''),
-                score: currentScore,
-                validWordCount: currentWords.length,
-                invalidWordCount: invalidWords.length,
-                words: currentWords,
-                invalidWords: invalidWords,
-                wordData: [...wordData, ...invalidWordData],
-                timeUsedSeconds: timeUsed,
-                completedEarly: timeRemaining > 0
-            };
-            
-            window.experimentResults = results;
-            console.log('Experiment Results:', results);
-        }
+            try {
+                const wordsData = currentWords.map((word, index) => ({
+                    word: word,
+                    points: getWordPoints(word),
+                    timestamp: wordTimestamps[index],
+                    order: index + 1,
+                    valid: true
+                }));
 
-        function downloadResults() {
-            const results = window.experimentResults;
-            
-            let csv = 'Participant ID,Version,Timestamp,Letters,Score,Valid Words,Invalid Words,Time Used (seconds),Completed Early,Word,Word Points,Valid\n';
-            
-            results.wordData.forEach(wd => {
-                csv += `${results.participantId},${results.version},${results.timestamp},${results.letters},${results.score},${results.validWordCount},${results.invalidWordCount},${results.timeUsedSeconds},${results.completedEarly},${wd.word},${wd.points},${wd.valid}\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `experiment_${results.participantId}_${results.version}_${Date.now()}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+                const invalidWordsData = invalidWords.map((word, index) => ({
+                    word: word,
+                    points: 0,
+                    timestamp: invalidWordTimestamps[index],
+                    order: currentWords.length + index + 1,
+                    valid: false
+                }));
+
+                const allWords = [...wordsData, ...invalidWordsData];
+
+                const gameData = {
+                    userId: userId,
+                    gameNumber: gameNumber,
+                    version: version,
+                    worldType: version === 'small-world' ? 'small' : 'big',
+                    letters: currentLetters.join(''),
+                    score: currentScore,
+                    validWordCount: currentWords.length,
+                    invalidWordCount: invalidWords.length,
+                    words: allWords,
+                    startTime: startTime.toISOString(),
+                    endTime: endTime.toISOString(),
+                    timeUsedSeconds: TIME_LIMIT - timeRemaining,
+                    completedEarly: timeRemaining > 0,
+                    deviceInfo: {
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform,
+                        language: navigator.language
+                    }
+                };
+
+                await db.collection('games').add(gameData);
+                
+                indicator.textContent = '✅ Results saved successfully!';
+                indicator.className = 'saving-indicator success';
+                
+                console.log('Game data saved:', gameData);
+            } catch (error) {
+                console.error('Error saving to Firebase:', error);
+                indicator.textContent = '⚠️ Could not save results. Please check your internet connection.';
+                indicator.className = 'saving-indicator error';
+            }
         }
     </script>
 </body>
 </html>
-
