@@ -95,28 +95,25 @@
         }
 
         /* Game Layout */
-        .game-container {
-            position: relative;
+        .game-header {
             display: flex;
-            align-items: center;
             justify-content: center;
-            margin: 5px 0;
+            align-items: center;
+            gap: 15px;
+            margin: 8px 0 10px 0;
         }
 
         .timer-box {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
             color: white;
-            padding: 15px 12px;
-            border-radius: 12px;
-            font-size: 24px;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 22px;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 3px 8px rgba(255, 152, 0, 0.3);
             text-align: center;
-            min-width: 65px;
+            min-width: 85px;
+            letter-spacing: 1px;
         }
 
         .timer-box.warning {
@@ -125,33 +122,33 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.05); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .score-box {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
             background: linear-gradient(135deg, #28a745 0%, #20883b 100%);
             color: white;
-            padding: 15px 12px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            padding: 8px 20px;
+            border-radius: 25px;
+            box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
             text-align: center;
-            min-width: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 100px;
         }
 
         .score-label {
-            font-size: 10px;
+            font-size: 14px;
             text-transform: uppercase;
-            opacity: 0.9;
-            margin-bottom: 3px;
+            opacity: 0.95;
+            font-weight: 600;
         }
 
         .score-value {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             line-height: 1;
         }
@@ -159,12 +156,19 @@
         .stats-box {
             display: none;
         }
+
+        .game-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px 0 10px 0;
+        }
         
         .letter-display {
             position: relative;
-            width: 380px;
-            height: 380px;
-            margin: 10px auto;
+            width: 450px;
+            height: 450px;
+            margin: 10px auto 15px auto;
         }
         
         .letter-box {
@@ -238,7 +242,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 5px 0 0 0;
+            margin: 8px 0 0 0;
             letter-spacing: 3px;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
             border-radius: 10px;
@@ -249,7 +253,7 @@
             text-align: center;
             color: #667eea;
             font-size: 13px;
-            margin: 5px 0 10px 0;
+            margin: 5px 0 8px 0;
             font-weight: 500;
         }
 
@@ -287,7 +291,7 @@
             padding: 8px 15px;
             background: #f8f9fa;
             border-radius: 8px;
-            margin: 10px 0;
+            margin: 8px 0;
             font-size: 14px;
             color: #555;
             min-height: 36px;
@@ -562,10 +566,35 @@
                 margin-bottom: 4px;
             }
 
+            .game-header {
+                gap: 8px;
+                margin: 6px 0;
+            }
+
+            .timer-box {
+                font-size: 16px;
+                padding: 5px 12px;
+                min-width: 60px;
+            }
+
+            .score-box {
+                padding: 5px 12px;
+                min-width: 75px;
+                gap: 5px;
+            }
+
+            .score-value {
+                font-size: 18px;
+            }
+
+            .score-label {
+                font-size: 9px;
+            }
+
             .letter-display {
-                width: 240px;
-                height: 240px;
-                margin: 5px auto;
+                width: 260px;
+                height: 260px;
+                margin: 8px auto 10px auto;
             }
 
             .game-container {
@@ -576,27 +605,6 @@
                 width: 44px;
                 height: 44px;
                 font-size: 20px;
-            }
-
-            .timer-box {
-                font-size: 18px;
-                padding: 10px 8px;
-                min-width: 50px;
-                left: -10px;
-            }
-
-            .score-box {
-                padding: 10px 8px;
-                min-width: 50px;
-                right: -10px;
-            }
-
-            .score-value {
-                font-size: 20px;
-            }
-
-            .score-label {
-                font-size: 8px;
             }
 
             .current-word-display {
@@ -652,7 +660,7 @@
                     <li>You will be given a set of letters</li>
                     <li>You have <strong>3 minutes</strong> to complete the task</li>
                     <li>Create as many valid English words as possible using only the given letters</li>
-                    <li>You can use each letter multiple times in different words</li>
+                    <li>You can use each letter only once</li>
                     <li>Minimum word length: 2 letters</li>
                     <li>No proper nouns (names, places, etc.)</li>
                 </ul>
@@ -668,18 +676,19 @@
         <div class="screen" id="game-screen">
             <h1>Word Generation Challenge</h1>
             
+            <div class="game-header">
+                <div class="timer-box" id="timer">3:00</div>
+                <div class="score-box">
+                    <span class="score-label">Score:</span>
+                    <span class="score-value" id="score-value">0</span>
+                </div>
+            </div>
+            
             <div class="current-word-display" id="current-word-display"></div>
             <div class="touch-hint">Touch and connect letters to form words</div>
             
             <div class="game-container">
-                <div class="timer-box" id="timer">3:00</div>
-                
                 <div class="letter-display" id="letter-display"></div>
-                
-                <div class="score-box">
-                    <div class="score-label">Score</div>
-                    <div class="score-value" id="score-value">0</div>
-                </div>
             </div>
             
             <div class="word-meaning" id="word-meaning"></div>
@@ -921,8 +930,8 @@
             const containerWidth = container.offsetWidth;
             const containerHeight = container.offsetHeight;
             
-            // Larger radius for better spacing
-            const radius = Math.min(containerWidth, containerHeight) / 2 - 40;
+            // Even larger radius for maximum spacing, especially for 8 letters
+            const radius = Math.min(containerWidth, containerHeight) / 2 - 35;
             const centerX = containerWidth / 2;
             const centerY = containerHeight / 2;
             
