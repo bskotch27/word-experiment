@@ -180,22 +180,16 @@
             position: relative;
         }
 
+        .word-tag.invalid {
+            background: #e74c3c;
+        }
+
         .word-points {
             background: rgba(255, 255, 255, 0.3);
             padding: 2px 8px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: bold;
-        }
-        
-        .word-tag .remove {
-            cursor: pointer;
-            font-weight: bold;
-            opacity: 0.8;
-        }
-        
-        .word-tag .remove:hover {
-            opacity: 1;
         }
         
         .results-table {
@@ -304,6 +298,34 @@
             100% { transform: scale(1); }
         }
 
+        .word-meaning {
+            text-align: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 4px solid #667eea;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .word-meaning.show {
+            opacity: 1;
+        }
+
+        .word-meaning .word-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 8px;
+        }
+
         .stats-row {
             display: flex;
             justify-content: center;
@@ -384,6 +406,8 @@
             
             <div class="timer" id="timer">3:00</div>
             
+            <div class="word-meaning" id="word-meaning"></div>
+            
             <div class="word-input-area">
                 <input 
                     type="text" 
@@ -396,7 +420,8 @@
             </div>
             
             <div style="text-align: center; color: #666; margin-top: 20px;">
-                Words found: <strong id="word-count">0</strong>
+                Valid words: <strong id="word-count">0</strong>
+                <span style="color: #e74c3c; margin-left: 15px;">Invalid: <strong id="invalid-count">0</strong></span>
             </div>
             
             <button class="done-button" onclick="confirmDone()">I am done ✓</button>
@@ -434,7 +459,14 @@
                 </table>
 
                 <h2 style="margin-top: 30px;">Your Words:</h2>
-                <div id="result-words" style="margin: 10px 0; color: #666; line-height: 2;"></div>
+                <div style="margin-top: 15px;">
+                    <strong>Valid Words:</strong>
+                    <div id="result-words" style="margin: 10px 0; color: #666; line-height: 2;"></div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>Invalid Attempts (0 points):</strong>
+                    <div id="result-invalid-words" style="margin: 10px 0; color: #e74c3c; line-height: 2;"></div>
+                </div>
 
                 <div class="highlight" style="margin-top: 30px;">
                     Thank you for participating! Your responses have been recorded.
@@ -446,63 +478,41 @@
     </div>
 
     <script>
-        // Experiment Configuration - OPTIMIZED FOR MEANINGFUL RARE WORDS
-        const SMALL_WORLD = ['A', 'E', 'R', 'N', 'S']; // 5 letters - Maximum meaningful rare words!
-        const BIG_WORLD = ['A', 'E', 'R', 'N', 'S', 'T', 'I', 'O']; // 8 letters
-        const TIME_LIMIT = 180; // 3 minutes in seconds
-
-        // Word Points System - Based on Word Frequency Rankings
-        // Scoring: Rank 1-1,000: 1 pt | 1,001-10,000: 3 pts | 10,001-30,000: 5 pts | 30,000+: 10 pts
-        // Only meaningful English words that people actually know
+        const SMALL_WORLD = ['A', 'I', 'R', 'S', 'T'];
+        const BIG_WORLD = ['A', 'E', 'R', 'N', 'S', 'T', 'I', 'O'];
+        const TIME_LIMIT = 180;
         const WORD_POINTS = {
-            // ===== SMALL WORLD (A, E, R, N, S) - ~25 meaningful words =====
-            // 2-letter words
-            "AS":1,"AN":1,"ER":3,
+            // 2-Letter Words
+            "AI": 10, "AN": 1, "AR": 5, "AS": 1, "AT": 1, "ER": 3, "ES": 10, "IN": 1, "IS": 1, "IT": 1, "NO": 1, "ON": 1, "OR": 1, "OS": 10, "RE": 5, "SI": 10, "SO": 1, "TA": 10, "TI": 10, "TO": 1,
             
-            // 3-letter words  
-            "ARE":1,"EAR":1,"ERA":1,"ERR":10,"ERS":10,"RAN":1,"SEA":1,"SEN":10,"SER":10,
-            
-            // 4-letter words
-            "EARN":1,"EARNS":3,"EARS":1,"ERAS":3,"ERRS":10,"NEAR":1,"NEARS":5,"SANE":3,"SANER":10,"SEAR":5,"SERA":5,"SNARE":5,
-            
-            // 5-letter words
-            "EARNS":3,"NEARS":5,"SANER":10,"SNARE":5,"SANER":10,"ARSES":10,"RASES":10,"NARES":10,"EARNS":3,
-            
-            // ===== BIG WORLD ADDITIONAL (+ T, I, O) - ~200 meaningful words =====
-            // 2-letter words (additional)
-            "AT":1,"IN":1,"IS":1,"IT":1,"NO":1,"ON":1,"OR":1,"SO":1,"TO":1,
-            
-            // 3-letter words (additional)
-            "AIT":10,"ANT":3,"ART":1,"ATE":1,"EAT":1,"ETA":5,"ION":3,"IRE":5,"NET":1,"NIT":5,"NOR":1,"NOT":1,"OAR":5,"OAT":5,"ONE":1,"ORE":3,"RAN":1,"RAT":3,"ROE":5,"ROT":3,"RAN":1,"SAT":1,"SIN":1,"SIR":1,"SIT":1,"SON":1,"TAR":3,"TAN":3,"TEA":1,"TEN":1,"TIE":3,"TIN":3,"TOE":3,"TON":3,"TOR":10,
-            
-            // 4-letter words (additional)
-            "ANTE":3,"ANTI":3,"ANTS":3,"AEON":5,"AIRS":3,"AIRT":10,"AIRN":10,"AITS":10,"ANISE":10,"ARISE":3,"ARTS":1,"ASTER":5,"EARN":1,"EAST":1,"EATS":3,"EONS":5,"ERAS":3,"ERNS":10,"EROS":5,"INTO":1,"IOTA":5,"IRON":1,"IRES":5,"NAOS":10,"NEAR":1,"NEAT":3,"NEST":3,"NETS":3,"NITE":5,"NITS":5,"NOES":3,"NORI":10,"NOSE":1,"NOTE":1,"OARS":5,"OAST":10,"OATS":5,"ONES":1,"ORES":5,"RAIN":1,"RANT":5,"RASE":10,"RASP":5,"RATE":1,"RATO":10,"RATS":3,"REIN":5,"RENT":1,"REST":1,"RETS":10,"RISE":1,"RITE":3,"ROAN":10,"ROSE":1,"ROTA":5,"ROTE":10,"ROTS":10,"SANE":3,"SARI":10,"SATE":10,"SATI":10,"SEAN":3,"SEAR":5,"SEAS":1,"SEAT":1,"SENT":1,"SERA":5,"SETA":10,"SINE":5,"SINS":3,"SIRE":5,"SITE":1,"SNIT":10,"SNOT":3,"SOAR":3,"SONE":10,"SONS":1,"SORA":10,"SORE":3,"SORI":10,"SORN":10,"SORT":1,"STAR":1,"STIR":3,"TANS":5,"TARE":10,"TARN":10,"TARO":10,"TARS":10,"TEAR":1,"TEAS":5,"TENS":1,"TERN":10,"TIES":3,"TINE":10,"TINS":5,"TIRE":3,"TIRO":10,"TOES":3,"TONE":1,"TONS":3,"TORE":3,"TORI":10,"TORN":3,"TORS":10,
-            
-            // 5-letter words
-            "AEONS":5,"ANISE":10,"ANTES":10,"ANTIS":5,"AIRNS":10,"AIRTS":10,"ARISE":3,"ARISEN":5,"AROSE":3,"ARSON":5,"ASTER":5,"ATONE":5,"EARNS":3,"ENTIA":10,"EOSIN":10,"ERNES":10,"IRATE":5,"IRONE":10,"IRONS":3,"NARES":10,"NEARS":5,"NEATS":10,"NERTS":10,"NITER":10,"NITRO":10,"NOIRS":10,"NOISE":1,"NORIA":10,"NORIS":10,"NOSER":10,"NOTER":10,"NOTES":1,"OATEN":10,"OATER":10,"ORANT":10,"ORATE":10,"OSIER":10,"OSTIA":10,"RAINS":3,"RAISE":1,"RANTS":5,"RATES":1,"RATIO":3,"RATOS":10,"REINS":5,"RENTS":3,"RESAT":10,"RESIN":10,"RETIA":10,"RINSE":5,"RIOTS":3,"RISEN":3,"RISER":5,"RISES":3,"RITES":3,"ROANS":10,"ROAST":3,"ROSET":10,"ROSIN":10,"ROTAS":10,"ROTES":10,"SANER":10,"SANTO":10,"SARIN":10,"SATIN":5,"SERAI":10,"SERIN":10,"SETON":10,"SNARE":5,"SNORE":5,"SNORT":5,"SIREN":5,"STOAE":10,"STOAI":10,"STONE":1,"STORE":1,"STRIA":10,"SENOR":10,"SENIOR":3,"STERNA":5,"STEIN":10,"STERN":3,"STAIN":3,"STAIR":3,"SAINT":3,"STARE":3,"TAINS":10,"TARNS":10,"TAROS":10,"TEARS":1,"TERNS":10,"TINES":10,"TIRES":3,"TIROS":10,"TONER":10,"TONES":3,"TORES":10,"TORSE":10,"TRAIN":1,"TRANS":3,"TRINE":10,"TRIOS":5,"TRONA":10,"TRONE":10,
-            
-            // 6-letter words
-            "ANESTRI":10,"ANTSIER":10,"ARISEN":5,"ARSINE":10,"ARSINO":10,"ASTERN":5,"ATONER":10,"ATONES":5,"INERTS":5,"INSERT":3,"INSTAR":10,"INTERS":5,"INTROS":5,"IRONES":10,"NORITE":10,"NOSIER":10,"OATERS":10,"ONSITE":5,"ORANTS":10,"ORATES":10,"ORIENT":5,"ORNATE":5,"OSTEAL":10,"RATINE":10,"RATION":3,"RETAIN":5,"RETINA":5,"RETSINA":10,"SENIOR":3,"SENORA":10,"SENORITA":5,"SINTER":5,"SORTIE":5,"STAINER":5,"STEARIN":10,"STONIER":10,"STRIAE":10,"TENORS":5,"TENSOR":10,"TREASON":5,"TRAINS":3,"TRINES":10,"TRIOSE":10,"NORITES":10,"OESTRIN":10,
-            
-            // 7+ letter words
-            "ANESTRI":10,"ANTSIER":10,"NASTIER":5,"RATINES":10,"RETAINS":5,"RETINAS":5,"RETSINA":10,"SAINTED":5,"STAINER":5,"STEARIN":10,"ENTRAIN":5,"STRAINED":3,"RESTRAINT":5,"STATIONER":5
+            // 3-Letter Words
+            "AIR": 3, "AIT": 10, "ANT": 5, "ARE": 1, "ART": 3, "ATE": 3, "EAR": 3, "EAT": 3, "ERA": 3, "ERN": 10, "ION": 5, "IRE": 5, "ITS": 1, "NET": 3, "NIT": 10, "NOR": 3, "NOT": 1, "OAR": 10, "OAT": 10, "ONE": 1, "ORE": 5, "RAN": 3, "RAT": 5, "RET": 10, "ROE": 10, "ROT": 5, "SAT": 3, "SEA": 1, "SEN": 10, "SER": 10, "SET": 1, "SIN": 3, "SIR": 3, "SIT": 3, "SON": 3, "SOT": 10, "TAN": 5, "TAR": 5, "TEA": 3, "TEN": 3, "TIE": 3, "TIN": 5, "TOE": 5, "TON": 5, "TOR": 10,
+            // 4-Letter Words
+            "AIRN": 10, "AIRS": 5, "AIRT": 10, "AITS": 10, "ANTE": 5, "ANTI": 5, "ANTS": 5, "ARTS": 3, "EARN": 3, "EARS": 3, "EAST": 3, "EATS": 3, "EONS": 5, "ETNA": 10, "INRO": 10, "INTO": 1, "IONS": 5, "IOTA": 10, "IRON": 3, "NAOI": 10, "NAOS": 10, "NEAR": 3, "NEAT": 3, "NEST": 3, "NETS": 3, "NITS": 10, "NOIR": 10, "NORI": 10, "NOSE": 3, "NOTE": 1, "OARS": 10, "OAST": 10, "OATS": 10, "ONES": 3, "ORES": 5, "RAIN": 3, "RANI": 10, "RANT": 10, "RASE": 5, "RATE": 3, "RATO": 10, "RATS": 5, "REIN": 5, "RENT": 3, "REST": 3, "RETS": 10, "RIAS": 10, "RIOT": 5, "RISE": 3, "RITE": 5, "ROAN": 10, "ROES": 10, "ROSE": 3, "ROTA": 10, "ROTE": 10, "ROTS": 5, "SANE": 5, "SARI": 10, "SATE": 10, "SATI": 10, "SEAR": 5, "SEAT": 3, "SENT": 3, "SERA": 10, "SINE": 10, "SIRE": 5, "SITE": 3, "SNIT": 10, "SNOT": 5, "SOAR": 5, "SONE": 10, "SORE": 3, "SORI": 10, "SORN": 10, "SORT": 3, "STAR": 3, "STIR": 3, "TARE": 10, "TARN": 10, "TARO": 10, "TARS": 5, "TEAR": 3, "TEAS": 5, "TENS": 5, "TERN": 10, "TIER": 5, "TIES": 5, "TINE": 10, "TINS": 5, "TIRE": 3, "TIRO": 10, "TOEA": 10, "TONE": 3, "TONS": 3, "TORE": 5, "TORI": 10, "TORN": 3,
+            // 5-Letter Words
+            "AEROS": 10, "AISLE": 5, "ANEW": 5, "ANISE": 10, "ANTES": 10, "ANTRE": 10, "ARISE": 3, "AROSE": 3, "ARSON": 5, "ASTER": 5, "ASTIR": 10, "ATONE": 5, "ERATO": 10, "INERT": 5, "INTRO": 5, "IRATE": 5, "IRONE": 10, "IRONS": 3, "NARES": 10, "NARIS": 10, "NITER": 10, "NITRE": 10, "NITRO": 10, "NOISE": 3, "NORIA": 10, "NOTES": 3, "OATEN": 10, "OATER": 10, "ORATE": 10, "ORIENT": 5, "OSIER": 10, "RAISE": 3, "RAINS": 3, "RANTS": 10, "RATIO": 5, "REINS": 5, "RENTS": 3, "RESIN": 10, "RETIA": 10, "RINSE": 5, "RIOTS": 5, "RISEN": 5, "ROAST": 5, "ROSIN": 10, "SAINT": 3, "SATIN": 5, "SENOR": 10, "SENTI": 10, "SERAI": 10, "SERIN": 10, "SITAR": 10, "SNARE": 5, "SNORT": 5, "SONAR": 5, "STAIN": 3, "STAIR": 3, "STARE": 3, "STERN": 5, "STOAE": 10, "STOAI": 10, "STONE": 3, "STORE": 3, "STRIA": 10, "TASER": 5, "TENIA": 10, "TENOR": 5, "TERNS": 10, "TIERS": 5, "TONER": 10, "TRAIN": 3, "TRIOS": 5,
+            // 6-Letter Words
+            "ACTION": 3, "AORIST": 10, "ARISEN": 5, "ARTIST": 3, "ASTERN": 5, "ATONER": 10, "ATONES": 5, "INSERT": 3, "INTERN": 5, "IRONES": 10, "NOTARI": 10, "ORIENT": 5, "ORNATE": 5, "RATION": 5, "RATIOS": 5, "RETAIN": 5, "RETINA": 5, "SENIOR": 3, "SENORA": 10, "STRAIN": 3, "TENSOR": 10, "TRANSI": 10,
+            // 7-Letter Words
+            "ACTIONS": 3, "AORISTS": 10, "ARSONIST": 5, "ENTRAIN": 5, "NOTARIES": 10, "ORIENTS": 5, "ORATION": 5, "RATINES": 10, "RATIONS": 5, "RETAINS": 5, "RETINAS": 5, "STATION": 3,
+            // 8-Letter Words
+            "ORATIONS": 5, "SENORITA": 5, "NOTATION": 5
         };
-        const DEFAULT_POINTS = 1; // Default points if word not in WORD_POINTS
 
-        function getWordPoints(word) {
-            return WORD_POINTS[word] || DEFAULT_POINTS;
-        }
-
-        // Experiment State
         let participantId = '';
-        let version = ''; // 'small-world' or 'big-world'
+        let version = '';
         let currentLetters = [];
         let currentWords = [];
+        let invalidWords = [];
         let currentScore = 0;
         let timerInterval = null;
         let timeRemaining = TIME_LIMIT;
         let startTime = null;
         let endTime = null;
+
+        function getWordPoints(word) {
+            return WORD_POINTS[word] || 1;
+        }
 
         function generateParticipantId() {
             return 'P' + Date.now().toString().slice(-8);
@@ -510,18 +520,14 @@
 
         function startExperiment() {
             participantId = generateParticipantId();
-            
-            // Coin flip: randomly assign to small or big world
             version = Math.random() < 0.5 ? 'small-world' : 'big-world';
             
-            // Set letters based on version
             if (version === 'small-world') {
                 currentLetters = [...SMALL_WORLD];
             } else {
                 currentLetters = [...BIG_WORLD];
             }
             
-            // Update UI
             document.getElementById('participant-info').textContent = `Participant ID: ${participantId} | Version: ${version}`;
             
             const badge = document.getElementById('version-badge');
@@ -539,6 +545,7 @@
 
         function startGame() {
             currentWords = [];
+            invalidWords = [];
             currentScore = 0;
             timeRemaining = TIME_LIMIT;
             startTime = new Date();
@@ -550,6 +557,10 @@
             document.getElementById('word-input').focus();
             document.getElementById('input-feedback').textContent = '';
             
+            const meaningElement = document.getElementById('word-meaning');
+            meaningElement.classList.remove('show');
+            meaningElement.innerHTML = '';
+            
             startTimer();
         }
 
@@ -558,8 +569,8 @@
             container.innerHTML = '';
             
             const numLetters = currentLetters.length;
-            const radius = 120; // radius of the circle
-            const centerX = 150; // center of container
+            const radius = 120;
+            const centerX = 150;
             const centerY = 150;
             
             currentLetters.forEach((letter, index) => {
@@ -567,9 +578,8 @@
                 box.className = 'letter-box';
                 box.textContent = letter;
                 
-                // Calculate position on circle
-                const angle = (index / numLetters) * 2 * Math.PI - Math.PI / 2; // Start from top
-                const x = centerX + radius * Math.cos(angle) - 30; // -30 to center the 60px box
+                const angle = (index / numLetters) * 2 * Math.PI - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle) - 30;
                 const y = centerY + radius * Math.sin(angle) - 30;
                 
                 box.style.left = x + 'px';
@@ -611,7 +621,7 @@
 
         function confirmDone() {
             const confirmed = confirm(
-                `Are you sure you want to finish?\n\nYour Score: ${currentScore}\nWords Found: ${currentWords.length}\nTime remaining: ${Math.floor(timeRemaining / 60)}:${(timeRemaining % 60).toString().padStart(2, '0')}`
+                `Are you sure you want to finish?\n\nYour Score: ${currentScore}\nValid Words: ${currentWords.length}\nInvalid Attempts: ${invalidWords.length}\nTime remaining: ${Math.floor(timeRemaining / 60)}:${(timeRemaining % 60).toString().padStart(2, '0')}`
             );
             
             if (confirmed) {
@@ -619,7 +629,6 @@
             }
         }
 
-        // Word Input Handling
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('word-input');
             input.addEventListener('keypress', function(e) {
@@ -638,20 +647,18 @@
                 return;
             }
             
-            // Validation
             if (word.length < 2) {
                 feedback.textContent = 'Word must be at least 2 letters';
                 setTimeout(() => feedback.textContent = '', 2000);
                 return;
             }
             
-            if (currentWords.includes(word)) {
+            if (currentWords.includes(word) || invalidWords.includes(word)) {
                 feedback.textContent = 'You already entered this word';
                 setTimeout(() => feedback.textContent = '', 2000);
                 return;
             }
             
-            // Check if word uses only available letters
             const wordLetters = word.split('');
             const validWord = wordLetters.every(letter => currentLetters.includes(letter));
             
@@ -661,37 +668,72 @@
                 return;
             }
             
-            // Check if word is in dictionary (has point value assigned)
-            if (!WORD_POINTS.hasOwnProperty(word)) {
-                feedback.textContent = 'Not a valid English word';
-                setTimeout(() => feedback.textContent = '', 2000);
+            if (!WORD_POINTS[word]) {
+                invalidWords.push(word);
+                input.value = '';
+                feedback.textContent = '';
+                updateWordDisplay();
+                
+                const meaningElement = document.getElementById('word-meaning');
+                meaningElement.innerHTML = `<span class="word-label" style="color:#e74c3c;">${word}:</span> <span style="color:#e74c3c;">Not a valid word (0 points)</span>`;
+                meaningElement.classList.add('show');
+                setTimeout(() => {
+                    meaningElement.classList.remove('show');
+                }, 3000);
                 return;
             }
             
-            // Add word
             currentWords.push(word);
             currentScore += getWordPoints(word);
             input.value = '';
             feedback.textContent = '';
             updateWordDisplay();
             updateScoreDisplay();
-        }
-
-        function removeWord(word) {
-            currentWords = currentWords.filter(w => w !== word);
-            currentScore -= getWordPoints(word);
-            updateWordDisplay();
-            updateScoreDisplay();
+            
+            showWordMeaning(word);
         }
 
         function updateScoreDisplay() {
             const scoreElement = document.getElementById('score-value');
             scoreElement.textContent = currentScore;
-            // Trigger animation by removing and re-adding the animation
             scoreElement.style.animation = 'none';
             setTimeout(() => {
                 scoreElement.style.animation = '';
             }, 10);
+        }
+
+        let meaningTimeout;
+        
+        function getWordMeaning(word) {
+            const points = getWordPoints(word);
+            
+            if (points === 10) {
+                return 'Rare word! Worth 10 points';
+            } else if (points === 5) {
+                return 'Uncommon word! Worth 5 points';
+            } else if (points === 3) {
+                return 'Good word! Worth 3 points';
+            } else {
+                return 'Common word! Worth 1 point';
+            }
+        }
+        
+        function showWordMeaning(word) {
+            const meaningElement = document.getElementById('word-meaning');
+            const meaning = getWordMeaning(word);
+            
+            if (meaning) {
+                if (meaningTimeout) {
+                    clearTimeout(meaningTimeout);
+                }
+                
+                meaningElement.innerHTML = '<span class="word-label">' + word + ':</span> ' + meaning;
+                meaningElement.classList.add('show');
+                
+                meaningTimeout = setTimeout(function() {
+                    meaningElement.classList.remove('show');
+                }, 3000);
+            }
         }
 
         function updateWordDisplay() {
@@ -705,22 +747,30 @@
                 tag.innerHTML = `
                     ${word}
                     <span class="word-points">${points}pt</span>
-                    <span class="remove" onclick="removeWord('${word}')">×</span>
+                `;
+                container.appendChild(tag);
+            });
+            
+            invalidWords.forEach(word => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag invalid';
+                tag.innerHTML = `
+                    ${word}
+                    <span class="word-points">0pt</span>
                 `;
                 container.appendChild(tag);
             });
             
             document.getElementById('word-count').textContent = currentWords.length;
+            document.getElementById('invalid-count').textContent = invalidWords.length;
         }
 
         function showResults() {
-            // Calculate time used
             const timeUsed = TIME_LIMIT - timeRemaining;
             const minutesUsed = Math.floor(timeUsed / 60);
             const secondsUsed = timeUsed % 60;
             const timeUsedStr = `${minutesUsed}:${secondsUsed.toString().padStart(2, '0')}`;
             
-            // Display results
             document.getElementById('result-version').textContent = 
                 version === 'small-world' ? 'Small World' : 'Big World';
             document.getElementById('result-letters').textContent = currentLetters.join(', ');
@@ -728,16 +778,17 @@
             document.getElementById('result-count').textContent = currentWords.length;
             document.getElementById('result-time').textContent = timeUsedStr;
             
-            // Display words with point values
             const wordsWithPoints = currentWords.map(word => {
                 const points = getWordPoints(word);
                 return `${word} (${points}pt)`;
             }).join(', ');
-            document.getElementById('result-words').textContent = wordsWithPoints;
+            document.getElementById('result-words').textContent = wordsWithPoints || 'None';
+            
+            const invalidWordsStr = invalidWords.join(', ');
+            document.getElementById('result-invalid-words').textContent = invalidWordsStr || 'None';
             
             showScreen('results-screen');
             
-            // Store results
             storeResults();
         }
 
@@ -751,10 +802,16 @@
         function storeResults() {
             const timeUsed = TIME_LIMIT - timeRemaining;
             
-            // Create detailed word data with points
             const wordData = currentWords.map(word => ({
                 word: word,
-                points: getWordPoints(word)
+                points: getWordPoints(word),
+                valid: true
+            }));
+            
+            const invalidWordData = invalidWords.map(word => ({
+                word: word,
+                points: 0,
+                valid: false
             }));
             
             const results = {
@@ -763,32 +820,28 @@
                 timestamp: new Date().toISOString(),
                 letters: currentLetters.join(''),
                 score: currentScore,
-                wordCount: currentWords.length,
+                validWordCount: currentWords.length,
+                invalidWordCount: invalidWords.length,
                 words: currentWords,
-                wordData: wordData,
+                invalidWords: invalidWords,
+                wordData: [...wordData, ...invalidWordData],
                 timeUsedSeconds: timeUsed,
                 completedEarly: timeRemaining > 0
             };
             
-            // Store in memory for download
             window.experimentResults = results;
-            
-            // Also log to console for easy copying
             console.log('Experiment Results:', results);
         }
 
         function downloadResults() {
             const results = window.experimentResults;
             
-            // Create CSV with detailed word information
-            let csv = 'Participant ID,Version,Timestamp,Letters,Score,Word Count,Time Used (seconds),Completed Early,Word,Word Points\n';
+            let csv = 'Participant ID,Version,Timestamp,Letters,Score,Valid Words,Invalid Words,Time Used (seconds),Completed Early,Word,Word Points,Valid\n';
             
-            // Add a row for each word
             results.wordData.forEach(wd => {
-                csv += `${results.participantId},${results.version},${results.timestamp},${results.letters},${results.score},${results.wordCount},${results.timeUsedSeconds},${results.completedEarly},${wd.word},${wd.points}\n`;
+                csv += `${results.participantId},${results.version},${results.timestamp},${results.letters},${results.score},${results.validWordCount},${results.invalidWordCount},${results.timeUsedSeconds},${results.completedEarly},${wd.word},${wd.points},${wd.valid}\n`;
             });
             
-            // Create download
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
