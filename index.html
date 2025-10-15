@@ -77,6 +77,26 @@
         .instructions li {
             margin-bottom: 8px;
         }
+
+        .demo-gif {
+            display: block;
+            margin: 20px auto;
+            max-width: 280px;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: 3px solid #667eea;
+        }
+
+        .gif-caption {
+            text-align: center;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: -12px;
+            margin-bottom: 20px;
+        }
         
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -486,6 +506,15 @@
                 margin-bottom: 5px;
             }
 
+            .demo-gif {
+                max-width: 220px;
+                margin: 15px auto;
+            }
+
+            .gif-caption {
+                font-size: 12px;
+            }
+
             .letter-display {
                 width: 280px;
                 height: 280px;
@@ -593,6 +622,16 @@
                 font-size: 15px;
             }
 
+            .demo-gif {
+                max-width: 180px;
+                margin: 12px auto;
+            }
+
+            .gif-caption {
+                font-size: 11px;
+                margin-top: -10px;
+            }
+
             .highlight {
                 padding: 12px;
                 font-size: 13px;
@@ -694,13 +733,17 @@
                 
                 <h2 style="margin-top: 25px;">How it works:</h2>
                 <ul>
-                    <li>You will be given a set of letters arranged in a circle</li
+                    <li>You will be given a set of letters arranged in a circle</li>
                     <li><strong>Touch and connect letters</strong> to form valid English words</li>
                     <li>You have <strong>3 minutes</strong> to complete the task</li>
                     <li><strong>Earn points</strong> by making words - rare words get more points!</li>
                     <li>Minimum word length: 2 letters</li>
                     <li>No proper nouns (names, places, etc.)</li>
                 </ul>
+
+                <!-- ADD YOUR GIF HERE -->
+                <img src="https://raw.githubusercontent.com/bskotch27/word-experiment/main/demo.gif" alt="Game demonstration" class="demo-gif">
+                <p class="gif-caption">👆 Swipe through letters to form words</p>
                 
                 <div class="highlight">
                     <strong>Important:</strong> You can click "I am done" when you've found all the words you can think of, or wait for the timer to run out.
@@ -803,24 +846,8 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDXmeQgFUr_PKOXVvQKHu-RVMETveMAkEw",
-            authDomain: "word-game-experiment.firebaseapp.com",
-            projectId: "word-game-experiment",
-            storageBucket: "word-game-experiment.firebasestorage.app",
-            messagingSenderId: "591494474863",
-            appId: "1:591494474863:web:f9af5737dc27f9e7da319a",
-            measurementId: "G-47Z1R9CG91"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+        // Simplified demo version - no Firebase
         const SMALL_WORLD = ['T','R','A','C','E'];
         const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
         const TIME_LIMIT  = 180;
@@ -854,7 +881,6 @@
         let startTime = null;
         let endTime = null;
 
-        // Touch input variables
         let inputMode = 'touch';
         let selectedLetters = [];
         let selectedElements = [];
@@ -868,25 +894,6 @@
                 localStorage.setItem('wordGameUserId', uid);
             }
             return uid;
-        }
-
-        async function getNextGameNumber() {
-            try {
-                const counterRef = db.collection('counters').doc('gameCounter');
-                const result = await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(counterRef);
-                    let newCount = 1;
-                    if (doc.exists) {
-                        newCount = (doc.data().count || 0) + 1;
-                    }
-                    transaction.set(counterRef, { count: newCount });
-                    return newCount;
-                });
-                return result;
-            } catch (error) {
-                console.error('Error getting game number:', error);
-                return Date.now();
-            }
         }
 
         function getWordPoints(word) {
@@ -917,9 +924,9 @@
             }
         }
 
-        async function startExperiment() {
+        function startExperiment() {
             userId = getUserId();
-            gameNumber = await getNextGameNumber();
+            gameNumber = Date.now();
             version = Math.random() < 0.5 ? 'small-world' : 'big-world';
             
             if (version === 'small-world') {
@@ -967,7 +974,6 @@
             const containerWidth = container.offsetWidth;
             const containerHeight = container.offsetHeight;
             
-            // Even larger radius for maximum spacing, especially for 8 letters
             const radius = Math.min(containerWidth, containerHeight) / 2 - 35;
             const centerX = containerWidth / 2;
             const centerY = containerHeight / 2;
@@ -986,12 +992,10 @@
                 box.style.left = x + 'px';
                 box.style.top = y + 'px';
                 
-                // Touch events
                 box.addEventListener('touchstart', handleTouchStart, { passive: false });
                 box.addEventListener('touchmove', handleTouchMove, { passive: false });
                 box.addEventListener('touchend', handleTouchEnd, { passive: false });
                 
-                // Mouse events (for desktop testing)
                 box.addEventListener('mousedown', handleMouseDown);
                 box.addEventListener('mouseenter', handleMouseEnter);
                 box.addEventListener('mouseup', handleMouseUp);
@@ -1021,7 +1025,6 @@
             
             if (element && element.classList.contains('letter-box')) {
                 const letter = element.dataset.letter;
-                const index = element.dataset.index;
                 
                 if (!selectedElements.includes(element)) {
                     selectLetter(element, letter);
@@ -1064,7 +1067,6 @@
             if (!isDrawing || inputMode !== 'touch') return;
             
             const letter = e.target.dataset.letter;
-            const index = e.target.dataset.index;
             
             if (!selectedElements.includes(e.target)) {
                 selectLetter(e.target, letter);
@@ -1096,7 +1098,6 @@
             element.classList.add('selected');
             element.classList.add('active');
             
-            // Haptic feedback
             if (navigator.vibrate) {
                 navigator.vibrate(10);
             }
@@ -1160,7 +1161,6 @@
         function submitTouchWord() {
             const word = selectedLetters.join('').toUpperCase();
             
-            // Animate word before submission
             const display = document.getElementById('current-word-display');
             display.classList.add('success');
             
@@ -1218,7 +1218,6 @@
                 }
             });
 
-            // Detect touch device and set default mode
             const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
             if (isTouchDevice) {
                 inputMode = 'touch';
@@ -1297,7 +1296,6 @@
             updateWordDisplay();
             updateScoreDisplay();
             
-            // Haptic feedback for valid word
             if (navigator.vibrate) {
                 navigator.vibrate([30, 10, 30]);
             }
@@ -1374,7 +1372,7 @@
             });
         }
 
-        async function showResults() {
+        function showResults() {
             const timeUsed = TIME_LIMIT - timeRemaining;
             const minutesUsed = Math.floor(timeUsed / 60);
             const secondsUsed = timeUsed % 60;
@@ -1398,7 +1396,9 @@
             
             showScreen('results-screen');
             
-            await saveToFirebase();
+            const indicator = document.getElementById('saving-indicator');
+            indicator.textContent = '✅ Demo mode - results not saved';
+            indicator.className = 'saving-indicator success';
         }
 
         function showScreen(screenId) {
@@ -1408,72 +1408,12 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        async function saveToFirebase() {
-            const indicator = document.getElementById('saving-indicator');
-            indicator.textContent = '📊 Saving your results...';
-            indicator.className = 'saving-indicator';
-            
-            try {
-                const wordsData = currentWords.map((word, index) => ({
-                    word: word,
-                    points: getWordPoints(word),
-                    timestamp: wordTimestamps[index],
-                    order: index + 1,
-                    valid: true
-                }));
-
-                const invalidWordsData = invalidWords.map((word, index) => ({
-                    word: word,
-                    points: 0,
-                    timestamp: invalidWordTimestamps[index],
-                    order: currentWords.length + index + 1,
-                    valid: false
-                }));
-
-                const allWords = [...wordsData, ...invalidWordsData];
-
-                const gameData = {
-                    userId: userId,
-                    gameNumber: gameNumber,
-                    version: version,
-                    worldType: version === 'small-world' ? 'small' : 'big',
-                    letters: currentLetters.join(''),
-                    score: currentScore,
-                    validWordCount: currentWords.length,
-                    invalidWordCount: invalidWords.length,
-                    words: allWords,
-                    startTime: startTime.toISOString(),
-                    endTime: endTime.toISOString(),
-                    timeUsedSeconds: TIME_LIMIT - timeRemaining,
-                    completedEarly: timeRemaining > 0,
-                    deviceInfo: {
-                        userAgent: navigator.userAgent,
-                        platform: navigator.platform,
-                        language: navigator.language
-                    }
-                };
-
-                await db.collection('games').add(gameData);
-                
-                indicator.textContent = '✅ Results saved successfully!';
-                indicator.className = 'saving-indicator success';
-                
-                console.log('Game data saved:', gameData);
-            } catch (error) {
-                console.error('Error saving to Firebase:', error);
-                indicator.textContent = '⚠️ Could not save results. Please check your internet connection.';
-                indicator.className = 'saving-indicator error';
-            }
-        }
-
-        // Handle window resize
         window.addEventListener('resize', function() {
             if (currentLetters.length > 0) {
                 displayLetters();
             }
         });
 
-        // Global mouse up handler
         document.addEventListener('mouseup', function() {
             if (isDrawing && inputMode === 'touch') {
                 isDrawing = false;
@@ -1484,7 +1424,6 @@
             }
         });
 
-        // Prevent context menu on long press
         document.addEventListener('contextmenu', function(e) {
             if (e.target.classList.contains('letter-box')) {
                 e.preventDefault();
@@ -1493,4 +1432,3 @@
     </script>
 </body>
 </html>
-
