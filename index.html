@@ -491,6 +491,71 @@
             color: #721c24;
         }
 
+        /* Countdown Overlay */
+        .countdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(102, 126, 234, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+
+        .countdown-overlay.active {
+            display: flex;
+        }
+
+        .countdown-number {
+            font-size: 120px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: countdownPulse 1s ease-in-out;
+        }
+
+        @keyframes countdownPulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .countdown-start {
+            font-size: 80px;
+            font-weight: bold;
+            color: #28a745;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: startPulse 0.8s ease-out;
+        }
+
+        @keyframes startPulse {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
         /* Mobile Responsive */
         @media (max-width: 600px) {
             body {
@@ -588,6 +653,14 @@
                 padding: 10px 25px;
                 font-size: 14px;
                 margin: 8px auto;
+            }
+
+            .countdown-number {
+                font-size: 80px;
+            }
+
+            .countdown-start {
+                font-size: 60px;
             }
         }
 
@@ -720,11 +793,24 @@
                 font-size: 13px;
                 margin: 5px auto;
             }
+
+            .countdown-number {
+                font-size: 70px;
+            }
+
+            .countdown-start {
+                font-size: 50px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Countdown Overlay -->
+        <div class="countdown-overlay" id="countdown-overlay">
+            <div class="countdown-number" id="countdown-number"></div>
+        </div>
+
         <!-- Welcome Screen -->
         <div class="screen active" id="welcome-screen">
             <h1>🎯 Word Generation Experiment</h1>
@@ -979,7 +1065,34 @@
             }
             
             showScreen('game-screen');
+            await showCountdown();
             startGame();
+        }
+
+        async function showCountdown() {
+            const overlay = document.getElementById('countdown-overlay');
+            const numberElement = document.getElementById('countdown-number');
+            
+            overlay.classList.add('active');
+            
+            // Countdown: 3, 2, 1
+            for (let i = 3; i >= 1; i--) {
+                numberElement.textContent = i;
+                numberElement.className = 'countdown-number';
+                await sleep(1000);
+            }
+            
+            // Show "START!"
+            numberElement.textContent = 'START!';
+            numberElement.className = 'countdown-start';
+            await sleep(800);
+            
+            // Hide overlay
+            overlay.classList.remove('active');
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         function startGame() {
