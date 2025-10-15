@@ -843,20 +843,31 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXmeQgFUr_PKOXVvQKHu-RVMETveMAkEw",
+            authDomain: "word-game-experiment.firebaseapp.com",
+            projectId: "word-game-experiment",
+            storageBucket: "word-game-experiment.firebasestorage.app",
+            messagingSenderId: "591494474863",
+            appId: "1:591494474863:web:f9af5737dc27f9e7da319a",
+            measurementId: "G-47Z1R9CG91"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // ============================================
         // GAME CONFIGURATION - CHANGE WORLD ORDER HERE
         // ============================================
-        // Set the sequence of worlds. Each player will get these in order.
-        // Options: 'small-world' or 'big-world'
-        // Example patterns:
-        // ['small-world', 'big-world'] - alternates small then big
-        // ['big-world', 'small-world'] - alternates big then small
-        // ['small-world', 'small-world', 'big-world'] - two small, then one big
-        const WORLD_SEQUENCE = ['small-world']; // LINE 816: CHANGE THIS TO CONTROL WORLD ORDER
+        const WORLD_SEQUENCE = ['small-world']; // CHANGE THIS TO CONTROL WORLD ORDER
         // ============================================
         
-        // Simplified demo version - no Firebase
         const SMALL_WORLD = ['T','R','A','C','E'];
         const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
         const TIME_LIMIT  = 180;
@@ -905,6 +916,25 @@
             return uid;
         }
 
+        async function getNextGameNumber() {
+            try {
+                const counterRef = db.collection('counters').doc('gameCounter');
+                const result = await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(counterRef);
+                    let newCount = 1;
+                    if (doc.exists) {
+                        newCount = (doc.data().count || 0) + 1;
+                    }
+                    transaction.set(counterRef, { count: newCount });
+                    return newCount;
+                });
+                return result;
+            } catch (error) {
+                console.error('Error getting game number:', error);
+                return Date.now();
+            }
+        }
+
         function getWordPoints(word) {
             return WORD_POINTS[word] || 1;
         }
@@ -933,12 +963,11 @@
             }
         }
 
-        function startExperiment() {
+        async function startExperiment() {
             userId = getUserId();
-            gameNumber = Date.now();
+            gameNumber = await getNextGameNumber();
             
             // Use the world sequence to determine version
-            // This alternates based on how many times the user has played
             const playCount = parseInt(localStorage.getItem('wordGamePlayCount') || '0');
             version = WORLD_SEQUENCE[playCount % WORLD_SEQUENCE.length];
             localStorage.setItem('wordGamePlayCount', (playCount + 1).toString());
@@ -1386,7 +1415,7 @@
             });
         }
 
-        function showResults() {
+        async function showResults() {
             const timeUsed = TIME_LIMIT - timeRemaining;
             const minutesUsed = Math.floor(timeUsed / 60);
             const secondsUsed = timeUsed % 60;
@@ -1410,9 +1439,7 @@
             
             showScreen('results-screen');
             
-            const indicator = document.getElementById('saving-indicator');
-            indicator.textContent = '✅ Demo mode - results not saved';
-            indicator.className = 'saving-indicator success';
+            await saveToFirebase();
         }
 
         function showScreen(screenId) {
@@ -1420,6 +1447,64 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
+        }
+
+        async function saveToFirebase() {
+            const indicator = document.getElementById('saving-indicator');
+            indicator.textContent = '📊 Saving your results...';
+            indicator.className = 'saving-indicator';
+            
+            try {
+                const wordsData = currentWords.map((word, index) => ({
+                    word: word,
+                    points: getWordPoints(word),
+                    timestamp: wordTimestamps[index],
+                    order: index + 1,
+                    valid: true
+                }));
+
+                const invalidWordsData = invalidWords.map((word, index) => ({
+                    word: word,
+                    points: 0,
+                    timestamp: invalidWordTimestamps[index],
+                    order: currentWords.length + index + 1,
+                    valid: false
+                }));
+
+                const allWords = [...wordsData, ...invalidWordsData];
+
+                const gameData = {
+                    userId: userId,
+                    gameNumber: gameNumber,
+                    version: version,
+                    worldType: version === 'small-world' ? 'small' : 'big',
+                    letters: currentLetters.join(''),
+                    score: currentScore,
+                    validWordCount: currentWords.length,
+                    invalidWordCount: invalidWords.length,
+                    words: allWords,
+                    startTime: startTime.toISOString(),
+                    endTime: endTime.toISOString(),
+                    timeUsedSeconds: TIME_LIMIT - timeRemaining,
+                    completedEarly: timeRemaining > 0,
+                    deviceInfo: {
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform,
+                        language: navigator.language
+                    }
+                };
+
+                await db.collection('games').add(gameData);
+                
+                indicator.textContent = '✅ Results saved successfully!';
+                indicator.className = 'saving-indicator success';
+                
+                console.log('Game data saved:', gameData);
+            } catch (error) {
+                console.error('Error saving to Firebase:', error);
+                indicator.textContent = '⚠️ Could not save results. Please check your internet connection.';
+                indicator.className = 'saving-indicator error';
+            }
         }
 
         window.addEventListener('resize', function() {
