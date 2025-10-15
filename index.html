@@ -99,7 +99,7 @@
         }
         
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #28a745;
             color: white;
             border: none;
             padding: 15px 40px;
@@ -115,7 +115,8 @@
         
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.4);
+            background: #218838;
         }
         
         button:active {
@@ -736,7 +737,7 @@
                     <li>You will be given a set of letters arranged in a circle</li>
                     <li><strong>Touch and connect letters</strong> to form valid English words</li>
                     <li>You have <strong>3 minutes</strong> to complete the task</li>
-                    <li><strong>Earn points</strong> by making words - rare words get more points!</li>
+                    <li><strong>Earn points</strong> by making words - rare words get more points! Try getting maximum points</li>
                     <li>Minimum word length: 2 letters</li>
                     <li>No proper nouns (names, places, etc.)</li>
                 </ul>
@@ -744,10 +745,6 @@
                 <!-- ADD YOUR GIF HERE -->
                 <img src="https://raw.githubusercontent.com/bskotch27/word-experiment/main/demo.gif" alt="Game demonstration" class="demo-gif">
                 <p class="gif-caption">👆 Swipe through letters to form words</p>
-                
-                <div class="highlight">
-                    <strong>Important:</strong> You can click "I am done" when you've found all the words you can think of, or wait for the timer to run out.
-                </div>
             </div>
             <button onclick="startExperiment()">Start Experiment</button>
         </div>
@@ -842,11 +839,23 @@
                     Thank you for participating! Your responses have been recorded.
                 </div>
             </div>
-            <button onclick="location.reload()" style="background: #667eea;">Play Again</button>
+            <button onclick="location.reload()">Play Again</button>
         </div>
     </div>
 
     <script>
+        // ============================================
+        // GAME CONFIGURATION - CHANGE WORLD ORDER HERE
+        // ============================================
+        // Set the sequence of worlds. Each player will get these in order.
+        // Options: 'small-world' or 'big-world'
+        // Example patterns:
+        // ['small-world', 'big-world'] - alternates small then big
+        // ['big-world', 'small-world'] - alternates big then small
+        // ['small-world', 'small-world', 'big-world'] - two small, then one big
+        const WORLD_SEQUENCE = ['small-world']; // LINE 816: CHANGE THIS TO CONTROL WORLD ORDER
+        // ============================================
+        
         // Simplified demo version - no Firebase
         const SMALL_WORLD = ['T','R','A','C','E'];
         const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
@@ -927,7 +936,12 @@
         function startExperiment() {
             userId = getUserId();
             gameNumber = Date.now();
-            version = Math.random() < 0.5 ? 'small-world' : 'big-world';
+            
+            // Use the world sequence to determine version
+            // This alternates based on how many times the user has played
+            const playCount = parseInt(localStorage.getItem('wordGamePlayCount') || '0');
+            version = WORLD_SEQUENCE[playCount % WORLD_SEQUENCE.length];
+            localStorage.setItem('wordGamePlayCount', (playCount + 1).toString());
             
             if (version === 'small-world') {
                 currentLetters = [...SMALL_WORLD];
