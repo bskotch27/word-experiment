@@ -1108,9 +1108,21 @@
             updateWordDisplay();
             updateScoreDisplay();
             document.getElementById('word-input').value = '';
+            const inputArea = document.getElementById('word-input-area');
+            const touchHint = document.querySelector('.touch-hint');
+            const currentWordDisplay = document.getElementById('current-word-display');
             if (inputMode === 'type') {
+                inputArea.style.display = 'block';
+                touchHint.style.display = 'none';
+                currentWordDisplay.style.display = 'none';
                 document.getElementById('word-input').focus();
+            } else {
+                inputArea.style.display = 'none';
+                touchHint.style.display = 'block';
+                currentWordDisplay.style.display = 'flex';
             }
+            
+         
             document.getElementById('input-feedback').textContent = '';
             
             const meaningElement = document.getElementById('word-meaning');
@@ -1644,3 +1656,4 @@
     </script>
 </body>
 </html>
+
