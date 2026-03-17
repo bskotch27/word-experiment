@@ -819,14 +819,13 @@
                 <p>Thank you for participating in this experiment about creativity and word formation.</p>                
                 <h2 style="margin-top: 25px;">How it works:</h2>
                 <ul>
-                    <li>You will be given a set of letters arranged in a circle</li>
+                    <li>You will be given 8 letters arranged in a circle</li>
                     <li><strong>Touch and connect letters</strong> to form valid English words</li>
                     <li>You have <strong>3 minutes</strong> to complete the task</li>
                     <li><strong>Earn points</strong> by making words - rare words get more points! Try getting maximum points</li>
-                    <li>Minimum word length: 2 letters No proper nouns (names, places, etc.)</li>
+                    <li>Minimum word length: 2 letters. No proper nouns (names, places, etc.)</li>
                  </ul>
 
-                <!-- ADD YOUR GIF HERE -->
                 <img src="https://raw.githubusercontent.com/bskotch27/word-experiment/main/demo.gif" alt="Game demonstration" class="demo-gif">
                 <p class="gif-caption">👆 Swipe through letters to form words</p>
             </div>
@@ -896,11 +895,7 @@
                 
                 <table class="results-table" style="margin-top: 30px;">
                     <tr>
-                        <th>Version</th>
                         <th>Letters</th>
-                    </tr>
-                    <tr>
-                        <td id="result-version"></td>
                         <td id="result-letters"></td>
                     </tr>
                 </table>
@@ -947,33 +942,107 @@
         const db = firebase.firestore();
 
         // ============================================
-        // GAME CONFIGURATION - CHANGE WORLD ORDER HERE
+        // GAME CONFIGURATION
         // ============================================
-        const WORLD_SEQUENCE = ['big-world','small-world']; // CHANGE THIS TO CONTROL WORLD ORDER
-        // ============================================
-        
-        const SMALL_WORLD = ['T','R','A','C','E'];
-        const BIG_WORLD   = ['T','R','A','C','E','X','Y','Z'];
-        const TIME_LIMIT  = 180;
+        const GAME_LETTERS = ['T','R','A','C','E','S','I','N'];
+        const TIME_LIMIT = 180;
 
         const WORD_POINTS = {
+            // Original TRACE words (2-letter)
             "AT": 1,
+            
+            // Original TRACE words (3-letter)
             "ACE": 1, "ACT": 1, "ARC": 1, "ARE": 1, "ART": 1, "ATE": 1,
             "CAR": 1, "CAT": 1, "EAR": 1, "EAT": 1, "ERA": 1, "ETC": 1,
-            "RAT": 1, "RET": 1, "TAR": 1, "TEA": 1, "AXE": 1, "CRY": 1,
-            "RYE": 1, "TRY": 1, "RAY": 1, "YAT": 1, "YEA": 1, "YET": 1, "TAX": 1,
-            "ACRE": 2, "ACER": 3, "ARET": 3, "ARTY": 2, "CARE": 2, "CART": 2,
-            "RACE": 2, "RACY": 2, "RATE": 2, "TACE": 3, "TARE": 2, "TEAR": 2,
-            "TERA": 2, "TRAY": 2, "YEAR": 2, "XRAY": 2, "EZRA": 2, "RAZE": 4,
-            "ZETA": 4, "CZAR": 3,
+            "RAT": 1, "RET": 1, "TAR": 1, "TEA": 1,
+            
+            // New 3-letter words with S, I, N
+            "AIN": 1, "ANI": 1, "ANT": 1, "CAN": 1, "INS": 1, "ITS": 1,
+            "NIT": 1, "NET": 1, "SAC": 1, "SAT": 1, "SEA": 1, "SEN": 1,
+            "SER": 1, "SET": 1, "SIN": 1, "SIR": 1, "SIT": 1, "TAN": 1,
+            "TEN": 1, "TIC": 1, "TIN": 1,
+            
+            // Original TRACE words (4-letter)
+            "ACRE": 2, "CARE": 2, "CART": 2, "RACE": 2, "RATE": 2, "TARE": 2, "TEAR": 2,
+            "ACER": 3, "ARET": 3, "TACE": 3,
+            
+            // New 4-letter words - 2 points
+            "ACES": 2, "ANTE": 2, "ANTI": 2, "ANTS": 2, "ARCS": 2, "ARES": 2,
+            "ARTS": 2, "ATES": 2, "CANE": 2, "CANS": 2, "CANT": 2, "CARS": 2,
+            "CASE": 2, "CAST": 2, "CATS": 2, "CITE": 2, "EARN": 2, "EARS": 2,
+            "EAST": 2, "EATS": 2, "ERAS": 2, "NARC": 2, "NEAR": 2, "NEAT": 2,
+            "NEST": 2, "NETS": 2, "NICE": 2, "RACE": 2, "RAIN": 2, "RANT": 2,
+            "RATS": 2, "REIN": 2, "RENT": 2, "REST": 2, "RICE": 2, "RISE": 2,
+            "RITE": 2, "SANE": 2, "SCAN": 2, "SCAR": 2, "SENT": 2, "SINE": 2,
+            "SIRE": 2, "SITE": 2, "STAR": 2, "STIR": 2, "TARS": 2, "TEAS": 2,
+            "TENS": 2, "TIER": 2, "TIES": 2, "TINS": 2, "TIRE": 2,
+            
+            // New 4-letter words - 3 points
+            "ACNE": 3, "AINS": 3, "ANES": 3, "ANIS": 3, "CAIN": 3, "CINE": 3,
+            "ETAS": 3, "ICES": 3, "IRES": 3, "NITE": 3, "RANI": 3, "RINS": 3,
+            "SARI": 3, "SATE": 3, "SCAT": 3, "SECT": 3, "SERA": 3, "SETA": 3,
+            "SNIT": 3, "TARN": 3, "TERN": 3, "TINE": 3,
+            
+            // Original TRACE words (5-letter)
             "CARET": 10, "CARTE": 10, "CATER": 8, "CRATE": 8, "CRETA": 8,
-            "REACT": 6, "RECTA": 8, "TRACE": 6, "EXACT": 5, "EXTRA": 5,
-            "TEARY": 6, "CRAZE": 10, "CRAZY": 6, "TAXER": 10, "AZTEC": 8,
+            "REACT": 6, "RECTA": 8, "TRACE": 6,
+            
+            // New 5-letter words - 5 points
+            "RAISE": 5, "RATES": 5, "STAIN": 5, "STARE": 5, "TEARS": 5,
+            "TRAIN": 5, "TRANS": 5, "TRIES": 5,
+            
+            // New 5-letter words - 6 points
+            "ACRES": 6, "ANTIC": 6, "ANTES": 6, "ANTIS": 6, "ASTER": 6,
+            "CANES": 6, "CANTS": 6, "CARES": 6, "CARTS": 6, "CASTE": 6,
+            "CINES": 6, "CITES": 6, "CRANE": 6, "CREST": 6, "CRIES": 6,
+            "EARNS": 6, "ENACT": 6, "INERT": 6, "IRATE": 6, "NEARS": 6,
+            "NICER": 6, "RAINS": 6, "RANTS": 6, "REINS": 6, "RENTS": 6,
+            "RINSE": 6, "RISEN": 6, "RITES": 6, "SANER": 6, "SATIN": 6,
+            "SCANT": 6, "SCARE": 6, "SIREN": 6, "SNARE": 6, "STAIR": 6,
+            "STERN": 6, "STEIN": 6, "TIERS": 6, "TINES": 6, "TIRES": 6,
+            "TRINE": 6,
+            
+            // New 5-letter words - 8 points
+            "ACNES": 8, "ANTRE": 8, "CANER": 8, "CARNS": 8, "CATES": 8,
+            "INSET": 8, "NARES": 8, "NATES": 8, "NEATS": 8, "NITER": 8,
+            "NITES": 8, "RANCE": 8, "RANIS": 8, "RESIN": 8, "RICES": 8,
+            "SAICE": 8, "STRIA": 8, "TAINS": 8, "TARNS": 8, "TERNS": 8,
+            "SCENT": 8,
+            
+            // New 5-letter words - 10 points
+            "NACRE": 10,
+            
+            // New 6-letter words - 10 points
+            "ANTICS": 10, "ANTRES": 10, "ASCENT": 10, "CANERS": 10, "CANTER": 10,
+            "CARETS": 10, "CASTER": 10, "CATERS": 10, "CRANES": 10, "CRATES": 10,
+            "ENACTS": 10, "INSERT": 10, "INTERS": 10, "RECANT": 10, "RECAST": 10,
+            "RETAIN": 10, "STANCE": 10, "TRANCE": 10, "TRAINS": 10,
+            
+            // New 6-letter words - 12 points
+            "CAIRNS": 12, "CENTRA": 12, "CITERS": 12, "CRETIN": 12, "INERTS": 12,
+            "INSECT": 12, "INSTAR": 12, "NECTAR": 12, "NITERS": 12, "RETINA": 12,
+            "SINTER": 12, "TRINES": 12,
+            
+            // New 6-letter words - 15 points
+            "CARNET": 15, "CASERN": 15, "NACRES": 15, "RECITS": 15, "STAINER": 15,
+            
+            // New 7-letter words - 15 points
+            "CANTERS": 15, "RETAINS": 15,
+            
+            // New 7-letter words - 18 points
+            "CANIEST": 18, "CARNETS": 18, "CRETINS": 18, "NECTARS": 18,
+            "RACIEST": 18, "RECANTS": 18, "RETINAS": 18, "TANRECS": 18,
+            
+            // New 7-letter words - 20 points
+            "SCANTER": 20,
+            
+            // New 8-letter words - 25 points
+            "CANISTER": 25, "CERATINS": 25, "CREATINS": 25, "SCANTIER": 25,
+            "TACRINES": 25,
         };
 
         let userId = '';
         let gameNumber = 0;
-        let version = '';
         let currentLetters = [];
         let currentWords = [];
         let wordTimestamps = [];
@@ -1020,7 +1089,7 @@
         }
 
         function getWordPoints(word) {
-            return WORD_POINTS[word] || 1;
+            return WORD_POINTS[word] || 0;
         }
 
         function setInputMode(mode) {
@@ -1050,17 +1119,7 @@
         async function startExperiment() {
             userId = getUserId();
             gameNumber = await getNextGameNumber();
-            
-            // Use the world sequence to determine version
-            const playCount = parseInt(localStorage.getItem('wordGamePlayCount') || '0');
-            version = WORLD_SEQUENCE[playCount % WORLD_SEQUENCE.length];
-            localStorage.setItem('wordGamePlayCount', (playCount + 1).toString());
-            
-            if (version === 'small-world') {
-                currentLetters = [...SMALL_WORLD];
-            } else {
-                currentLetters = [...BIG_WORLD];
-            }
+            currentLetters = [...GAME_LETTERS];
             
             showScreen('game-screen');
             await showCountdown();
@@ -1073,19 +1132,16 @@
             
             overlay.classList.add('active');
             
-            // Countdown: 3, 2, 1
             for (let i = 3; i >= 1; i--) {
                 numberElement.textContent = i;
                 numberElement.className = 'countdown-number';
                 await sleep(1000);
             }
             
-            // Show "START!"
             numberElement.textContent = 'START!';
             numberElement.className = 'countdown-start';
             await sleep(800);
             
-            // Hide overlay
             overlay.classList.remove('active');
         }
 
@@ -1120,7 +1176,6 @@
                 currentWordDisplay.style.display = 'flex';
             }
             
-         
             document.getElementById('input-feedback').textContent = '';
             
             const meaningElement = document.getElementById('word-meaning');
@@ -1437,8 +1492,9 @@
             }
             
             const timestamp = new Date().toISOString();
+            const points = getWordPoints(word);
             
-            if (!WORD_POINTS[word]) {
+            if (points === 0) {
                 invalidWords.push(word);
                 invalidWordTimestamps.push(timestamp);
                 if (!wordParam) input.value = '';
@@ -1456,7 +1512,7 @@
             
             currentWords.push(word);
             wordTimestamps.push(timestamp);
-            currentScore += getWordPoints(word);
+            currentScore += points;
             if (!wordParam) input.value = '';
             feedback.textContent = '';
             updateWordDisplay();
@@ -1479,10 +1535,14 @@
         function getWordMeaning(word) {
             const points = getWordPoints(word);
             
-            if (points === 10) {
-                return 'Rare word! Worth 10 points';
-            } else if (points === 8) {
-                return 'Uncommon word! Worth 8 points';
+            if (points >= 20) {
+                return 'Extremely rare word! Worth ' + points + ' points!';
+            } else if (points >= 15) {
+                return 'Very rare word! Worth ' + points + ' points!';
+            } else if (points >= 10) {
+                return 'Rare word! Worth ' + points + ' points';
+            } else if (points >= 8) {
+                return 'Uncommon word! Worth ' + points + ' points';
             } else if (points >= 5) {
                 return 'Good word! Worth ' + points + ' points';
             } else if (points >= 3) {
@@ -1544,8 +1604,6 @@
             const secondsUsed = timeUsed % 60;
             const timeUsedStr = `${minutesUsed}:${secondsUsed.toString().padStart(2, '0')}`;
             
-            document.getElementById('result-version').textContent = 
-                version === 'small-world' ? 'Small World' : 'Big World';
             document.getElementById('result-letters').textContent = currentLetters.join(', ');
             document.getElementById('result-score').textContent = currentScore;
             document.getElementById('result-count').textContent = currentWords.length;
@@ -1599,8 +1657,8 @@
                 const gameData = {
                     userId: userId,
                     gameNumber: gameNumber,
-                    version: version,
-                    worldType: version === 'small-world' ? 'small' : 'big',
+                    version: 'trace-sin',
+                    worldType: 'big',
                     letters: currentLetters.join(''),
                     score: currentScore,
                     validWordCount: currentWords.length,
@@ -1654,9 +1712,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
